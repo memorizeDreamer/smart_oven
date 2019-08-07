@@ -1,15 +1,16 @@
 package com.project.service;
 
+import com.google.gson.JsonObject;
 import com.project.common.JPushMessage;
-import com.project.entity.MobileDetailInfo;
 import com.project.entity.OvenDetailInfo;
 import com.project.entity.OvenMobileRelation;
-import com.project.repository.MobileDetailInfoRepository;
+import com.project.entity.TransformRequest;
 import com.project.repository.OvenDetailInfoRepository;
 import com.project.repository.OvenMobileRelationRepository;
 import com.project.response.ReturnInfo;
 import com.project.response.ServerResponse;
 import com.project.util.FileUtil;
+import com.project.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,10 +57,10 @@ public class MobileAppService {
     /**
      * 手机APP推送消息给设备
      * @param ovenId
-     * @param jsonBody
+     * @param transformRequest
      * @return
      */
-    public ServerResponse transformData(String ovenId, String jsonBody){
+    public ServerResponse transformData(String ovenId, TransformRequest transformRequest){
         OvenMobileRelation ovenMobileRelation = ovenMobileRelationRepository.findOvenMobileRelationByOvenId(ovenId);
         if (ovenMobileRelation == null){
             return ServerResponse.createByError(ReturnInfo.UNKNOWN_DEVICE.getMsg());
@@ -68,7 +69,7 @@ public class MobileAppService {
         if (ovenDetailInfo == null){
             return ServerResponse.createByError(ReturnInfo.UNKNOWN_DEVICE.getMsg());
         }
-        jPushMessage.jPushMessage(jsonBody,ovenDetailInfo.getRegistrationId());
+        jPushMessage.jPushMessage(JsonUtils.getStrFromObject(transformRequest),ovenDetailInfo.getRegistrationId());
         return ServerResponse.createBySuccess();
     }
 }

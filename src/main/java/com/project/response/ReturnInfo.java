@@ -4,6 +4,7 @@ package com.project.response;
 public enum ReturnInfo {
 
     OPERATION_SUCCESS("操作成功", 200),
+    NEED_LOGIN("NEED_LOGIN",400),
     OPERATION_FAIL("操作失败", 400),
     EMPTY_PIC_ERROR("上传的图片为空或文件传输错误",400),
     UNKNOWN_DEVICE("未绑定或不存在该设备",400);

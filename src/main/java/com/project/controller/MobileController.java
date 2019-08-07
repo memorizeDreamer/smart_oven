@@ -1,5 +1,6 @@
 package com.project.controller;
 
+import com.project.entity.TransformRequest;
 import com.project.response.ServerResponse;
 import com.project.service.MobileAppService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class MobileController {
     @ResponseBody
     @PostMapping("/mobile/transform.do")
     public ServerResponse transformData(@RequestHeader String ovenId,
-                                        @RequestBody String jsonBody){
-        return mobileAppService.transformData(ovenId,jsonBody);
+                                        @RequestBody TransformRequest transformRequest){
+        return mobileAppService.transformData(ovenId,transformRequest);
     }
 }

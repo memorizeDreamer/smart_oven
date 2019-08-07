@@ -27,4 +27,7 @@ public class MobileDetailInfo {
 
     @Column(name = "update_time")
     private Long updateTime;
+
+    @Column(name = "group_id")
+    private String groupId;
 }

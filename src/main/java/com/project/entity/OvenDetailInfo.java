@@ -30,4 +30,16 @@ public class OvenDetailInfo {
 
     @Column(name = "update_time")
     private Long updateTime;
+
+    @Column(name = "group_id")
+    private String groupId;
+
+    @Column(name = "oven_status")
+    private int ovenStatus;//  1-正在工作   0-表示闲置
+
+    @Column(name = "oven_type")
+    private int ovenType;// 0-烤箱类型  1-微波炉类型
+
+    @Column(name = "oven_online")
+    private int ovenOnline; // 0-在线  1-离线
 }

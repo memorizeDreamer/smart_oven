@@ -1,6 +1,5 @@
 package com.project.entity;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,17 +11,11 @@ import javax.persistence.Id;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "oven_mobile_relation")
-public class OvenMobileRelation {
+@Entity(name = "max_device_num")
+public class MaxDeviceNum {
     @Id
     private int id;
 
-    @Column(name = "oven_id")
-    private String ovenId;
-
-    @Column(name = "mobile_id")
-    private String mobileId;
-
-    @Column(name = "update_date")
-    private Long updateDate;
+    @Column(name = "max_device_num")
+    private int maxDeviceNum;// 最大设备数
 }
