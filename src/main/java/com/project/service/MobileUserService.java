@@ -53,6 +53,10 @@ public class MobileUserService {
         if(!validResponse.isSuccess()){
             return validResponse;
         }
+        //检测手机号是否已经注册
+        if (!checkMobileIsResgister(mobileUser.getMobile())){
+            return ServerResponse.createByErrorMessage("该手机号已经注册");
+        }
         //检测密码6-20位,两次密码是否一致
         validResponse = this.checkValid(mobileUser.getPassword(),anotherPassword,Const.PASSWORD);
         if(!validResponse.isSuccess()){
@@ -68,6 +72,17 @@ public class MobileUserService {
         mobileUser.setUpdateTime(System.currentTimeMillis());
         mobileUserRepository.save(mobileUser);
         return ServerResponse.createBySuccessMessage("注册成功");
+    }
+
+
+    /**
+     * 检测手机号是否已经注册
+     * @param mobileNum
+     * @return
+     */
+    public Boolean checkMobileIsResgister(String mobileNum){
+        MobileUser mobileUser = mobileUserRepository.findMobileUserByMobile(mobileNum);
+        return mobileUser == null;
     }
 
     public ServerResponse<String> checkValid(String username, String password) {
@@ -125,7 +140,7 @@ public class MobileUserService {
             if ("username".equals(type)){
                 if (org.apache.commons.lang3.StringUtils.isBlank(str)) {
                     return ServerResponse.createByErrorMessage("用户名不能为空");
-                }else if(str.length() < 6 && str.length() > 11) {
+                }else if(str.length() < 6 || str.length() > 11) {
                     return ServerResponse.createByErrorMessage("用户名格式错误");
                 }
                 MobileUser mobileUser = null;
@@ -140,7 +155,7 @@ public class MobileUserService {
                 }
             }
             if("password".equals(type)){
-                //两次密码是否一致,密码6-20位
+                //两次密码是否一致,密码6-16位
                 if (org.apache.commons.lang3.StringUtils.isBlank(str)||org.apache.commons.lang3.StringUtils.isBlank(anotherPassword)) {
                     return ServerResponse.createByErrorMessage("密码不能为空");
                 }
@@ -204,6 +219,9 @@ public class MobileUserService {
      */
     public ServerResponse checkSmsCodeString(String mobileNum,String enterSmsCodeString,String type){
         CodeString codeString = codeStringRepository.findFirstByMobileNumOrderByCreateTimeDesc(mobileNum);
+        if (codeString==null) {
+            return ServerResponse.createByErrorMessage("请确认输入信息是否正确");
+        }
         Long createTime = codeString.getCreateTime();
         Long currentTime = System.currentTimeMillis();
         if (currentTime - createTime > 300000){
@@ -211,9 +229,6 @@ public class MobileUserService {
         }
         if(!(org.apache.commons.lang3.StringUtils.isBlank(enterSmsCodeString))){
             if (Const.FORGETPASSWORD.equals(type)) {
-                if (codeString==null) {
-                    return ServerResponse.createByErrorMessage("该账号不存在");
-                }
                 if (enterSmsCodeString.equals(codeString.getCodeString())) {
                     String forgetToken = UUID.randomUUID().toString();
                     return ServerResponse.createBySuccess(forgetToken);
@@ -221,9 +236,6 @@ public class MobileUserService {
                 return ServerResponse.createByErrorMessage("验证码不正确，请重新输入");
             }
             if (Const.REGISTER.equals(type)) {
-                if (codeString==null) {
-                    return ServerResponse.createByErrorMessage("请确认账号是否输入正确");
-                }
                 log.debug(codeString.getCodeString()+"update time : "+codeString.getCreateTime());
 
                 if (enterSmsCodeString.equals(codeString.getCodeString())) {
@@ -255,9 +267,12 @@ public class MobileUserService {
         if (existMobileUser == null) {
             return ServerResponse.createByErrorMessage("该账号不存在");
         }
+        if (passwordNew.length() > 16 || passwordNew.length() < 6){
+            return ServerResponse.createByErrorMessage("密码长度不在6-16");
+        }
         String md5Password  = MD5Util.MD5Encode(passwordNew,"UTF-8");
         mobileUserRepository.updatePassword(System.currentTimeMillis(),md5Password,username);
-        return ServerResponse.createByErrorMessage("修改密码失败");
+        return ServerResponse.createBySuccessMessage("修改密码成功");
     }
 
     public ServerResponse<String> resetPassword(String passwordNew,MobileUser mobileUser,String codeString){
@@ -265,9 +280,12 @@ public class MobileUserService {
         if (serverResponse.getErrorCode() != ReturnInfo.OPERATION_SUCCESS.getCode()){
             return serverResponse;
         }
+        if (passwordNew.length() > 16 || passwordNew.length() < 6){
+            return ServerResponse.createByErrorMessage("密码长度不在6-16");
+        }
         String password = MD5Util.MD5Encode(passwordNew,"UTF-8");
         mobileUserRepository.updatePassword(System.currentTimeMillis(),password,mobileUser.getUsername());
-        return ServerResponse.createByErrorMessage("密码更新成功");
+        return ServerResponse.createBySuccessMessage("密码更新成功");
     }
 
     public static boolean isNumeric(String str){
