@@ -1,10 +1,9 @@
 package com.project.service;
 
-import com.google.gson.JsonObject;
 import com.project.common.JPushMessage;
 import com.project.entity.OvenDetailInfo;
 import com.project.entity.OvenMobileRelation;
-import com.project.entity.TransformRequest;
+import com.project.request.TransformRequest;
 import com.project.repository.OvenDetailInfoRepository;
 import com.project.repository.OvenMobileRelationRepository;
 import com.project.response.ReturnInfo;

@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Data
 @NoArgsConstructor
@@ -18,15 +15,17 @@ public class CodeString {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "mobile_num")
     private String mobileNum;
 
     private String username;
 
+    @Column(name = "code_string")
     private String codeString;
 
-    private Long userCodeStringCount;
-
+    @Column(name = "create_time")
     private Long createTime;
 
+    @Column(name = "update_time")
     private Long updateTime;
 }

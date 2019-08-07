@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 @Slf4j
@@ -23,13 +22,14 @@ public class UserController {
 
     /**
      * 用户登录
-     * @param username
-     * @param password
+     * @param mobileUser
      * @param session
      * @return
      */
     @PostMapping(value = "/mobile/user/login.do")
-    public ServerResponse login(@RequestHeader("username") String username, @RequestHeader("password")String password,HttpSession session){
+    public ServerResponse login(@RequestBody MobileUser mobileUser, HttpSession session){
+        String username = mobileUser.getUsername();
+        String password = mobileUser.getPassword();
         ServerResponse serverResponse = mobileUserService.login(username,password);
         if(serverResponse.isSuccess()){
             session.setAttribute(CURRENT_USER,serverResponse.getData());
@@ -39,19 +39,16 @@ public class UserController {
         return serverResponse;
     }
 
-    @RequestMapping("/login_status.do")
-    @ResponseBody
+    @RequestMapping("/mobile/user/login_status.do")
     public ServerResponse LoginStatus(HttpSession session){
         MobileUser mobileUser = (MobileUser) session.getAttribute(CURRENT_USER);
         if(mobileUser == null){
             return ServerResponse.createByError(ReturnInfo.NEED_LOGIN.getMsg());
         }
-        log.info("用户已登录");
-        return ServerResponse.createBySuccess();
+        return ServerResponse.createBySuccess("用户已登录");
     }
 
-    @RequestMapping(value = "/logout.do")
-    @ResponseBody
+    @RequestMapping(value = "/mobile/user/logout.do")
     public ServerResponse logout(HttpSession session){
         session.removeAttribute(CURRENT_USER);
         return ServerResponse.createBySuccessMessage("用户已退出");
@@ -69,15 +66,15 @@ public class UserController {
         return mobileUserService.register(mobileUser, anotherPassword, codeString);
     }
 
-    @RequestMapping(value = "/check_valid.do")
+    @RequestMapping(value = "/mobile/user/check_valid.do")
     @ResponseBody
-    public ServerResponse checkValid(String str, String anotherPassword, String type, HttpServletResponse response, String callback){
+    public ServerResponse checkValid(String str, String anotherPassword, String type){
         return mobileUserService.checkValid(str,anotherPassword,type);
     }
 
-    @RequestMapping(value = "/get_user_info.do")
+    @RequestMapping(value = "/mobile/user/get_user_info.do")
     @ResponseBody
-    public ServerResponse getUserInfo(HttpSession session,HttpServletResponse response){
+    public ServerResponse getUserInfo(HttpSession session){
         MobileUser mobileUser = (MobileUser) session.getAttribute(Const.CURRENT_USER);
         if(mobileUser != null){
             return ServerResponse.createBySuccess(mobileUser);
@@ -99,10 +96,21 @@ public class UserController {
      * 验证短信验证码，验证成功返回token给前端
      * 设置新密码时，和密码一起传入校验
      */
-    @RequestMapping(value = "/forget_check_smsCodeString.do")
+    @RequestMapping(value = "/mobile/user/forget_check_smsCodeString.do")
     @ResponseBody
-    public ServerResponse forgetCheckSmsCodeString(String username, String enterSmsCodeString, String type, HttpServletResponse response, String callback){
+    public ServerResponse forgetCheckSmsCodeString(String username, String enterSmsCodeString, String type){
         return mobileUserService.checkSmsCodeString(username,enterSmsCodeString,type);
+    }
+
+    @PostMapping(value = "/mobile/user/reset_password.do")
+    public ServerResponse resetPassword(HttpSession session,
+                                        @RequestHeader("passwordNew") String passwordNew,
+                                        @RequestHeader("codeString") String codeString){
+        MobileUser mobileUser = (MobileUser) session.getAttribute(Const.CURRENT_USER);
+        if(mobileUser == null){
+            return ServerResponse.createByErrorMessage("用户未登录");
+        }
+        return mobileUserService.resetPassword(passwordNew,mobileUser,codeString);
     }
 
     /*
@@ -110,9 +118,10 @@ public class UserController {
      * @param passwordNew :新密码
      * @param forgetToken :token
      */
-    @RequestMapping(value = "/forget_reset_password.do")
-    @ResponseBody
-    public ServerResponse forgetRestPassword(String username, String passwordNew, String forgetToken){
-        return mobileUserService.forgetResetPassword(username,passwordNew,forgetToken);
+    @RequestMapping(value = "/mobile/user/forget_reset_password.do")
+    public ServerResponse forgetRestPassword(@RequestBody MobileUser mobileUser,
+                                             @RequestHeader("passwordNew") String passwordNew,
+                                             @RequestHeader("codeString") String codeString){
+        return mobileUserService.forgetResetPassword(mobileUser,passwordNew,codeString);
     }
 }

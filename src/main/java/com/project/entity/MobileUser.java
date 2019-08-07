@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Data
 @NoArgsConstructor
@@ -24,7 +21,9 @@ public class MobileUser {
 
     private String mobile;
 
-    private Long registerTime;
+    @Column(name = "create_time")
+    private Long createTime;
 
-    private String registerIp;
+    @Column(name = "update_time")
+    private Long updateTime;
 }

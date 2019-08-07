@@ -6,6 +6,7 @@ import com.project.entity.CodeString;
 import com.project.entity.MobileUser;
 import com.project.repository.CodeStringRepository;
 import com.project.repository.MobileUserRepository;
+import com.project.response.ReturnInfo;
 import com.project.response.ServerResponse;
 import com.project.util.MD5Util;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +64,8 @@ public class MobileUserService {
         }
         //MD5加密
         mobileUser.setPassword(MD5Util.MD5Encode(mobileUser.getPassword(),"UTF-8"));
+        mobileUser.setCreateTime(System.currentTimeMillis());
+        mobileUser.setUpdateTime(System.currentTimeMillis());
         mobileUserRepository.save(mobileUser);
         return ServerResponse.createBySuccessMessage("注册成功");
     }
@@ -178,6 +181,8 @@ public class MobileUserService {
         String result = SmsInterface.sendTplSms(codeStringModel.getMobileNum(), codeString);
         log.info("发送短信验证的状态："+result);
         codeStringModel.setCodeString(codeString);
+        codeStringModel.setCreateTime(System.currentTimeMillis());
+        codeStringModel.setUpdateTime(System.currentTimeMillis());
         codeStringRepository.save(codeStringModel);
         return ServerResponse.createBySuccessMessage("验证码已发送");
     }
@@ -197,16 +202,15 @@ public class MobileUserService {
      * 验证是否正确，时间是否失效,5分钟
      * 验证成功返回token
      */
-    public ServerResponse<String> checkSmsCodeString(String mobileNum,String enterSmsCodeString,String type){
+    public ServerResponse checkSmsCodeString(String mobileNum,String enterSmsCodeString,String type){
+        CodeString codeString = codeStringRepository.findFirstByMobileNumOrderByCreateTimeDesc(mobileNum);
+        Long createTime = codeString.getCreateTime();
+        Long currentTime = System.currentTimeMillis();
+        if (currentTime - createTime > 300000){
+            return ServerResponse.createByErrorMessage("验证码已失效");
+        }
         if(!(org.apache.commons.lang3.StringUtils.isBlank(enterSmsCodeString))){
             if (Const.FORGETPASSWORD.equals(type)) {
-                CodeString codeString = null;
-                try {
-                    codeString = codeStringRepository.findCodeStringByMobileNum(mobileNum);
-                } catch (EmptyResultDataAccessException e) {
-                    log.error("can not find codestring: "+mobileNum);
-                    codeString = null;
-                }
                 if (codeString==null) {
                     return ServerResponse.createByErrorMessage("该账号不存在");
                 }
@@ -217,13 +221,6 @@ public class MobileUserService {
                 return ServerResponse.createByErrorMessage("验证码不正确，请重新输入");
             }
             if (Const.REGISTER.equals(type)) {
-                CodeString codeString = null;
-                try {
-                    codeString = codeStringRepository.findCodeStringByMobileNum(mobileNum);
-                } catch (EmptyResultDataAccessException e) {
-                    log.error("can not find codestring: "+mobileNum);
-                    codeString = null;
-                }
                 if (codeString==null) {
                     return ServerResponse.createByErrorMessage("请确认账号是否输入正确");
                 }
@@ -242,20 +239,35 @@ public class MobileUserService {
      * @param passwordNew :传入新密码
      * @param forgetToken :token
      */
-    public ServerResponse forgetResetPassword(String username,String passwordNew,String forgetToken){
-        MobileUser mobileUser = null;
+    public ServerResponse forgetResetPassword(MobileUser mobileUser, String passwordNew,String codeString){
+        ServerResponse serverResponse = checkSmsCodeString(mobileUser.getMobile(),codeString,Const.FORGETPASSWORD);
+        if (serverResponse.getErrorCode() != ReturnInfo.OPERATION_SUCCESS.getCode()){
+            return serverResponse;
+        }
+        String username = mobileUser.getUsername();
+        MobileUser existMobileUser = null;
         try {
-            mobileUser = mobileUserRepository.findMobileUserByUsername(username);
+            existMobileUser = mobileUserRepository.findMobileUserByUsername(username);
         } catch (EmptyResultDataAccessException e) {
             log.error("can not find codestring: "+username);
-            mobileUser = null;
+            existMobileUser = null;
         }
-        if (mobileUser == null) {
+        if (existMobileUser == null) {
             return ServerResponse.createByErrorMessage("该账号不存在");
         }
         String md5Password  = MD5Util.MD5Encode(passwordNew,"UTF-8");
         mobileUserRepository.updatePassword(System.currentTimeMillis(),md5Password,username);
         return ServerResponse.createByErrorMessage("修改密码失败");
+    }
+
+    public ServerResponse<String> resetPassword(String passwordNew,MobileUser mobileUser,String codeString){
+        ServerResponse serverResponse = checkSmsCodeString(mobileUser.getMobile(),codeString,Const.FORGETPASSWORD);
+        if (serverResponse.getErrorCode() != ReturnInfo.OPERATION_SUCCESS.getCode()){
+            return serverResponse;
+        }
+        String password = MD5Util.MD5Encode(passwordNew,"UTF-8");
+        mobileUserRepository.updatePassword(System.currentTimeMillis(),password,mobileUser.getUsername());
+        return ServerResponse.createByErrorMessage("密码更新成功");
     }
 
     public static boolean isNumeric(String str){

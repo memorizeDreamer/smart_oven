@@ -1,6 +1,6 @@
 package com.project.controller;
 
-import com.project.entity.TransformRequest;
+import com.project.request.TransformRequest;
 import com.project.response.ServerResponse;
 import com.project.service.MobileAppService;
 import org.springframework.beans.factory.annotation.Autowired;

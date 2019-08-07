@@ -1,13 +1,11 @@
 package com.project.controller;
 
-import com.project.entity.TransformRequest;
+import com.project.request.TransformRequest;
 import com.project.response.ServerResponse;
 import com.project.service.OvenMobileRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
