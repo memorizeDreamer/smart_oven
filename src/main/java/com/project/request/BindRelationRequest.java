@@ -1,5 +1,6 @@
 package com.project.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,13 +9,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BindRelationRequest {
+    @JsonProperty(value = "oven_id")
     private String ovenId;
 
+    @JsonProperty(value = "mobile_id")
     private String mobileId;
 
-    private String ovenRegisterId;
+    @JsonProperty(value = "oven_tag_id")
+    private String ovenTagId;
 
-    private String mobileRegisterId;
+    @JsonProperty("mobile_tag_id")
+    private String mobileTagId;
 
+    @JsonProperty("oven_name")
     private String ovenName;
 }

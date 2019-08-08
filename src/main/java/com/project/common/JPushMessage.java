@@ -24,10 +24,10 @@ public class JPushMessage {
     @Value("${jiguang.app_key}")
     private String appKey = "d4ee2375846bc30fa51334f5";
 
-    public void jPushMessage(String message, String registrationId){
+    public void jPushMessage(String message, String tagId){
         ClientConfig clientConfig = ClientConfig.getInstance();
         JPushClient jpushClient = new JPushClient(masterSecret, appKey, null, clientConfig);
-        PushPayload payload = buildPushObjectAllAliasAlert(message,registrationId);
+        PushPayload payload = buildPushObjectAllAliasAlert(message,tagId);
         try {
             log.info(payload.toString());
             PushResult result = jpushClient.sendPush(payload);
@@ -46,10 +46,10 @@ public class JPushMessage {
         }
     }
 
-    public PushPayload buildPushObjectAllAliasAlert(String alert, String registrationId) {
+    public PushPayload buildPushObjectAllAliasAlert(String alert, String tagId) {
         return PushPayload.newBuilder()
                 .setPlatform(Platform.all())
-                .setAudience(Audience.registrationId(registrationId))
+                .setAudience(Audience.tag(tagId))
                 .setNotification(Notification.alert(alert))
                 .setOptions(Options.newBuilder().setApnsProduction(false).setTimeToLive(86000).build())
                 .build();

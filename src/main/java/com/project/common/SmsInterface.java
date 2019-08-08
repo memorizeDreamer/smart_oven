@@ -18,13 +18,13 @@ import java.util.Map;
 
 public class SmsInterface {
     //账号
-    private static String account = "JSM4007602";
+    private static String account = "JSM42969";
     //密码
-    private static String password = "ofuqskvp";
+    private static String password = "9qkwrxuu";
     //通讯Key/校验码
-    private static String veryCode = "xr5dyh7gozfm";
+    private static String veryCode = "ghmuikhbvi8u";
     //模板编号
-    private static String tplId = "JSM40076-0010";
+    private static String tplId = "JSM42969-0001";
     //apiUrl
     private static String http_url  = "http://112.74.76.186:8030";
     /*

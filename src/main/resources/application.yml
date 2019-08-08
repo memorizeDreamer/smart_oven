@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/smart_oven?useSSL=false&characterEncoding=utf8
+    url: jdbc:mysql://localhost:3306/smart_oven?useSSL=false&characterEncoding=utf8
     username: root
     password: xxc6711758
     hikari:

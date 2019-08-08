@@ -1,6 +1,7 @@
 package com.project.controller;
 
 import com.project.request.BindRelationRequest;
+import com.project.response.ServerResponse;
 import com.project.service.CommonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,7 +15,12 @@ public class CommonController {
     private CommonService commonService;
 
     @PostMapping("/common/bind.do")
-    public void bindRelation(@RequestBody BindRelationRequest bindRelationRequest){
-        commonService.bindRelationService(bindRelationRequest);
+    public ServerResponse bindRelation(@RequestBody BindRelationRequest bindRelationRequest){
+        return commonService.bindRelationService(bindRelationRequest);
+    }
+
+    @PostMapping("/common/remove_bind.do")
+    public ServerResponse removeBindRelation(@RequestBody BindRelationRequest bindRelationRequest){
+        return commonService.removeBindRelationService(bindRelationRequest);
     }
 }

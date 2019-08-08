@@ -18,8 +18,8 @@ public class MobileDetailInfo {
     @Column(name = "mobile_id")
     private String mobileId;
 
-    @Column(name = "registration_id")
-    private String registrationId;
+    @Column(name = "tag_id")
+    private String tagId;
 
     @Column(name = "create_time")
     private Long createTime;

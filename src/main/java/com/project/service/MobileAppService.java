@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -68,7 +70,22 @@ public class MobileAppService {
         if (ovenDetailInfo == null){
             return ServerResponse.createByError(ReturnInfo.UNKNOWN_DEVICE.getMsg());
         }
-        jPushMessage.jPushMessage(JsonUtils.getStrFromObject(transformRequest),ovenDetailInfo.getRegistrationId());
+        jPushMessage.jPushMessage(JsonUtils.getStrFromObject(transformRequest),ovenDetailInfo.getTagId());
         return ServerResponse.createBySuccess();
+    }
+
+    /**
+     * 获取当前mobile下所有绑定的烤箱
+     * @param mobileId
+     * @return
+     */
+    public ServerResponse getOvenMsgUnderCurrentMobile(String mobileId){
+        List<OvenMobileRelation> ovenMobileRelationList = ovenMobileRelationRepository.findOvenMobileRelationByMobileIdOrderByUpdateDateDesc(mobileId);
+        List<OvenDetailInfo> ovenDetailInfoList = new ArrayList<>();
+        for (OvenMobileRelation ovenMobileRelation : ovenMobileRelationList){
+            OvenDetailInfo ovenDetailInfo = ovenDetailInfoRepository.findOvenDetailInfoByOvenId(ovenMobileRelation.getOvenId());
+            ovenDetailInfoList.add(ovenDetailInfo);
+        }
+        return ServerResponse.createBySuccess(ovenDetailInfoList);
     }
 }

@@ -69,7 +69,7 @@ public class OvenMobileRelationService {
         }
         String url = GET_PICTURE_ROOT_URL + fileSavePath.replace(".jpg","");
         OvenDetailInfo ovenDetailInfo = ovenDetailInfoRepository.findOvenDetailInfoByOvenId(ovenId);
-        jPushMessage.jPushMessage(url,ovenDetailInfo.getRegistrationId());
+        jPushMessage.jPushMessage(url,ovenDetailInfo.getTagId());
         return ServerResponse.createBySuccess();
     }
 
@@ -89,7 +89,7 @@ public class OvenMobileRelationService {
         if (mobileDetailInfo == null){
             return ServerResponse.createByError(ReturnInfo.UNKNOWN_DEVICE.getMsg());
         }
-        jPushMessage.jPushMessage(JsonUtils.getStrFromObject(transformRequest),mobileDetailInfo.getRegistrationId());
+        jPushMessage.jPushMessage(JsonUtils.getStrFromObject(transformRequest),mobileDetailInfo.getTagId());
         return ServerResponse.createBySuccess();
     }
 

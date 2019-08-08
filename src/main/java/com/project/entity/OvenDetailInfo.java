@@ -18,8 +18,8 @@ public class OvenDetailInfo {
     @Column(name = "oven_id")
     private String ovenId;
 
-    @Column(name = "registration_id")
-    private String registrationId;
+    @Column(name = "tag_id")
+    private String tagId;
 
     @Column(name = "oven_name")
     private String ovenName;

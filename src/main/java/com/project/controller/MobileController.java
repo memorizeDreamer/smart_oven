@@ -9,12 +9,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 
-@Controller
+@RestController
 public class MobileController {
     @Autowired
     private MobileAppService mobileAppService;
 
-    @ResponseBody
     @RequestMapping("/mobile/getPicture/{DATE_TIME}/{PHONE_NUM}/{OVEN_ID}/{TASK_ID}")
     public void getPicture(@PathVariable(value = "DATE_TIME") String datetime,
                            @PathVariable(value = "PHONE_NUM") String phoneNum,
@@ -24,10 +23,14 @@ public class MobileController {
         mobileAppService.getPicture(datetime,phoneNum,ovenId,taskId,response);
     }
 
-    @ResponseBody
     @PostMapping("/mobile/transform.do")
-    public ServerResponse transformData(@RequestHeader String ovenId,
+    public ServerResponse transformData(@RequestHeader("oven_id") String ovenId,
                                         @RequestBody TransformRequest transformRequest){
         return mobileAppService.transformData(ovenId,transformRequest);
+    }
+
+    @PostMapping("/mobile/get_ovens_msg.do")
+    public ServerResponse getOvenMsgUnderCurrentMobile(@RequestHeader("mobile_id") String mobileId){
+        return mobileAppService.getOvenMsgUnderCurrentMobile(mobileId);
     }
 }
