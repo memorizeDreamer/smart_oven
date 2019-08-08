@@ -25,5 +25,5 @@ oven:
   maxNum: 20
 
 jiguang:
-  master_secret: 3f045fd404d09a8a1f38d791
-  app_key: d4ee2375846bc30fa51334f5
+  master_secret: *****
+  app_key: *****
