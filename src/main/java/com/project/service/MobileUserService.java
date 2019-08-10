@@ -11,13 +11,17 @@ import com.project.repository.MobileUserRepository;
 import com.project.response.ReturnInfo;
 import com.project.response.ServerResponse;
 import com.project.util.DateUtil;
+import com.project.util.FileUtil;
 import com.project.util.MD5Util;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -28,6 +32,9 @@ import java.util.regex.Pattern;
 @Slf4j
 @Service
 public class MobileUserService {
+    @Value("${file.picture.path}")
+    public String fileRootPath;
+
     @Autowired
     private MobileUserRepository mobileUserRepository;
 
@@ -36,6 +43,8 @@ public class MobileUserService {
 
     @Autowired
     private ConfigureInfoRepository configureInfoRepository;
+
+    private final static String USER_HEAD_IMAGE = "http://47.103.85.203:8090/mobile/user/get_user_image.do?username=";
 
     @Value("${config.key.max_code_num}")
     private String maxCodeNumKey;
@@ -311,6 +320,36 @@ public class MobileUserService {
         String password = MD5Util.MD5Encode(passwordNew,"UTF-8");
         mobileUserRepository.updatePassword(System.currentTimeMillis(),password,mobileUser.getUsername());
         return ServerResponse.createBySuccessMessage("密码更新成功");
+    }
+
+    public ServerResponse uploadUserImage(String username,MultipartFile file){
+        String filepath = fileRootPath + username + "/head_image.jpg";
+        try {
+            FileInputStream fileInputStream = (FileInputStream) file.getInputStream();
+            FileUtil.writeFile(filepath,fileInputStream);
+        } catch (IOException e) {
+            return ServerResponse.createByError(ReturnInfo.EMPTY_PIC_ERROR.getMsg());
+        }
+        // 上传完成之后，需要更新用户图像记录
+        mobileUserRepository.updatePassword(USER_HEAD_IMAGE+username,System.currentTimeMillis(),username);
+        return ServerResponse.createBySuccessMessage("上传图像成功");
+    }
+
+    public void getPicture(String username, HttpServletResponse response){
+        try {
+            String filepath = fileRootPath + username  + "/head/head_image.jpg";
+            File file = new File(filepath);
+            @SuppressWarnings("resource")
+            InputStream is = new FileInputStream(file);
+            OutputStream os = response.getOutputStream();
+            byte[] buffer = new byte[1024]; // 图片文件流缓存池
+            while (is.read(buffer) != -1) {
+                os.write(buffer);
+            }
+            os.flush();
+        } catch (IOException ioe) {
+            log.error(ioe.toString());
+        }
     }
 
     public static boolean isNumeric(String str){

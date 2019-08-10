@@ -23,4 +23,9 @@ public interface MobileUserRepository extends CrudRepository<MobileUser,Integer>
     @Modifying
     @Query("update mobile_user set update_time = ?1 , password =?2 where username = ?3")
     int updatePassword(Long updateTime, String password, String username);
+
+    @Transactional
+    @Modifying
+    @Query("update mobile_user set user_image = ?1 , update_time =?2 where username = ?3")
+    int updatePassword(String userImage, Long updateTime, String username);
 }

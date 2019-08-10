@@ -10,7 +10,9 @@ import com.project.service.MobileUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 @Slf4j
@@ -168,5 +170,21 @@ public class UserController {
             return ServerResponse.createByErrorMessage("鉴权失败");
         }
         return mobileUserService.forgetResetPassword(mobileUser,passwordNew,codeString);
+    }
+
+    @PostMapping("/mobile/user/upload_user_image.do")
+    public ServerResponse uploadUserImage(@RequestHeader("username") String username,
+                                          @RequestHeader("token")String token,
+                                          @RequestBody MultipartFile file){
+        String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"upload_user_image.do");
+        if (!AuthToken.checkToken(sourceToken,token)){
+            return ServerResponse.createByErrorMessage("鉴权失败");
+        }
+        return mobileUserService.uploadUserImage(username,file);
+    }
+
+    @GetMapping("/mobile/user/get_user_image.do")
+    public void getUserImage(@RequestParam("username")String username, HttpServletResponse response){
+        mobileUserService.getPicture(username,response);
     }
 }

@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +26,7 @@ import java.util.Set;
 @Slf4j
 @Service
 public class OvenMobileRelationService {
-    private final static String GET_PICTURE_ROOT_URL = "http://127.0.0.1:8090/mobile/process/getPicture/";
+    private final static String GET_PICTURE_ROOT_URL = "http://47.103.85.203:8090/mobile/process/getPicture/";
 
     @Value("${file.picture.path}")
     public String fileRootPath;
