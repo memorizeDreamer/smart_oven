@@ -34,6 +34,7 @@ public class ServerResponse<T> implements Serializable {
         this.data = data;
     }
 
+
     private ServerResponse(int errorCode,String errorMessage,T data){
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
@@ -85,6 +86,10 @@ public class ServerResponse<T> implements Serializable {
 
     public static <T> ServerResponse<T> createBySuccess(String errorMessage,T data){
         return new ServerResponse<T>(ReturnInfo.OPERATION_SUCCESS.getCode(),errorMessage,data);
+    }
+
+    public static <T> ServerResponse<T> createByReturnInfo(ReturnInfo returnInfo){
+        return new ServerResponse<T>(returnInfo.getCode(),returnInfo.getMsg());
     }
 
     public static <T> ServerResponse<T> createBySuccess(T data,T total){

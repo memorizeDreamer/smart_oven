@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "oven_status")
+@Entity(name = "oven_send_status")
 public class OvenStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

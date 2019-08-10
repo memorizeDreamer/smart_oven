@@ -10,6 +10,7 @@ import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
 import cn.jpush.api.push.model.audience.Audience;
 import cn.jpush.api.push.model.notification.Notification;
+import com.project.response.ServerResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,12 +20,16 @@ import org.springframework.stereotype.Component;
 public class JPushMessage {
 
     @Value("${jiguang.master_secret}")
-    private String masterSecret = "3f045fd404d09a8a1f38d791";
+    private String masterSecret = "fd9785be7e05b9dc14569f63";
 
     @Value("${jiguang.app_key}")
-    private String appKey = "d4ee2375846bc30fa51334f5";
+    private String appKey = "3b1b3049c6ec58542a7f8a5b";
 
-    public void jPushMessage(String message, String tagId){
+    public static void main(String[] args){
+        new JPushMessage().jPushMessage("test","666666");
+    }
+
+    public ServerResponse jPushMessage(String message, String tagId){
         ClientConfig clientConfig = ClientConfig.getInstance();
         JPushClient jpushClient = new JPushClient(masterSecret, appKey, null, clientConfig);
         PushPayload payload = buildPushObjectAllAliasAlert(message,tagId);
@@ -32,9 +37,11 @@ public class JPushMessage {
             log.info(payload.toString());
             PushResult result = jpushClient.sendPush(payload);
             log.info("Got result - " + result);
+            return ServerResponse.createBySuccessMessage("推送成功");
         } catch (APIConnectionException e) {
             log.error("Connection error. Should retry later. ", e);
             log.error("Sendno: " + payload.getSendno());
+            return ServerResponse.createByErrorMessage("极光推送连接失败，请稍后重试");
 
         } catch (APIRequestException e) {
             log.error("Error response from JPush server. Should review and fix it. ", e);
@@ -43,6 +50,7 @@ public class JPushMessage {
             log.info("Error Message: " + e.getErrorMessage());
             log.info("Msg ID: " + e.getMsgId());
             log.error("Sendno: " + payload.getSendno());
+            return ServerResponse.createByErrorMessage(e.getErrorMessage());
         }
     }
 

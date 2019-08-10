@@ -35,12 +35,12 @@ public class MobileAppService {
     @Autowired
     private JPushMessage jPushMessage;
 
-    public void getPicture(String dateTime, String phoneNum, String ovenId,String taskId, HttpServletResponse response){
+    public void getPicture(String dateTime, String phoneNum, String ovenId,String taskId, String fileName, HttpServletResponse response){
         try {
             OvenMobileRelation ovenMobileRelation = new OvenMobileRelation();
             ovenMobileRelation.setMobileId(phoneNum);
             ovenMobileRelation.setOvenId(ovenId);
-            String filepath = fileRootPath + FileUtil.getFilePath(dateTime,phoneNum,ovenId,taskId);
+            String filepath = fileRootPath + FileUtil.getFilePath(dateTime,phoneNum,ovenId,taskId, fileName);
             File file = new File(filepath);
             @SuppressWarnings("resource")
             InputStream is = new FileInputStream(file);
@@ -68,10 +68,25 @@ public class MobileAppService {
         }
         OvenDetailInfo ovenDetailInfo = ovenDetailInfoRepository.findOvenDetailInfoByOvenId(ovenId);
         if (ovenDetailInfo == null){
+            // 设备未绑定
             return ServerResponse.createByError(ReturnInfo.UNKNOWN_DEVICE.getMsg());
         }
-        jPushMessage.jPushMessage(JsonUtils.getStrFromObject(transformRequest),ovenDetailInfo.getTagId());
-        return ServerResponse.createBySuccess();
+        if (ovenDetailInfo.getOvenOnline() == 1){
+            //设备断网
+            return ServerResponse.createByReturnInfo(ReturnInfo.DEVICE_UNCONNECT);
+        }
+        // TODO 烤箱正在操作时候，需要烤箱返回一个识别码
+//        if (ovenDetailInfo.getOvenStatus() == 1 && transformRequest.getStatus() == 1){
+//            // 设备正在运行中,并且推送的状态也是让烤箱运行，则返回正在运行
+//            return ServerResponse.createByReturnInfo(ReturnInfo.DEVICE_ISRUNNING);
+//        }
+        // 更新烤箱状态
+        ServerResponse serverResponse = jPushMessage.jPushMessage(JsonUtils.getStrFromObject(transformRequest),ovenDetailInfo.getTagId());
+        if (serverResponse.isSuccess()){
+            int status = transformRequest.getStatus();
+            ovenDetailInfoRepository.updateOvenStatus(status,ovenId);
+        }
+        return serverResponse;
     }
 
     /**

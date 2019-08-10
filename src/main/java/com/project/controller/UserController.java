@@ -1,5 +1,6 @@
 package com.project.controller;
 
+import com.project.common.AuthToken;
 import com.project.common.Const;
 import com.project.entity.CodeString;
 import com.project.entity.MobileUser;
@@ -20,6 +21,9 @@ public class UserController {
 
     private static final String CURRENT_USER = "currentUser";
 
+    private static final String MODULE_NAME = "mobile";
+
+    private static final String CONTROLLER_NAME = "user";
     /**
      * 用户登录
      * @param mobileUser
@@ -27,7 +31,13 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "/mobile/user/login.do")
-    public ServerResponse login(@RequestBody MobileUser mobileUser, HttpSession session){
+    public ServerResponse login(@RequestBody MobileUser mobileUser,
+                                @RequestHeader ("token") String token,
+                                HttpSession session){
+        String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"login.do");
+        if (!AuthToken.checkToken(sourceToken,token)){
+            return ServerResponse.createByErrorMessage("鉴权失败");
+        }
         String username = mobileUser.getUsername();
         String password = mobileUser.getPassword();
         ServerResponse serverResponse = mobileUserService.login(username,password);
@@ -40,7 +50,12 @@ public class UserController {
     }
 
     @RequestMapping("/mobile/user/login_status.do")
-    public ServerResponse LoginStatus(HttpSession session){
+    public ServerResponse LoginStatus(@RequestHeader ("token") String token,
+                                      HttpSession session){
+        String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"login_status.do");
+        if (!AuthToken.checkToken(sourceToken,token)){
+            return ServerResponse.createByErrorMessage("鉴权失败");
+        }
         MobileUser mobileUser = (MobileUser) session.getAttribute(CURRENT_USER);
         if(mobileUser == null){
             return ServerResponse.createByError(ReturnInfo.NEED_LOGIN.getMsg());
@@ -49,7 +64,12 @@ public class UserController {
     }
 
     @RequestMapping(value = "/mobile/user/logout.do")
-    public ServerResponse logout(HttpSession session){
+    public ServerResponse logout(@RequestHeader ("token") String token,
+                                 HttpSession session){
+        String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"logout.do");
+        if (!AuthToken.checkToken(sourceToken,token)){
+            return ServerResponse.createByErrorMessage("鉴权失败");
+        }
         session.removeAttribute(CURRENT_USER);
         return ServerResponse.createBySuccessMessage("用户已退出");
     }
@@ -62,7 +82,12 @@ public class UserController {
     @PostMapping(value = "/mobile/user/register.do")
     public ServerResponse register(@RequestBody MobileUser mobileUser,
                                    @RequestHeader("anotherPassword") String anotherPassword,
+                                   @RequestHeader ("token") String token,
                                    @RequestHeader("codeString") String codeString){
+        String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"register.do");
+        if (!AuthToken.checkToken(sourceToken,token)){
+            return ServerResponse.createByErrorMessage("鉴权失败");
+        }
         return mobileUserService.register(mobileUser, anotherPassword, codeString);
     }
 
@@ -74,7 +99,12 @@ public class UserController {
 
     @RequestMapping(value = "/mobile/user/get_user_info.do")
     @ResponseBody
-    public ServerResponse getUserInfo(HttpSession session){
+    public ServerResponse getUserInfo(@RequestHeader ("token") String token,
+                                      HttpSession session){
+        String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"get_user_info.do");
+        if (!AuthToken.checkToken(sourceToken,token)){
+            return ServerResponse.createByErrorMessage("鉴权失败");
+        }
         MobileUser mobileUser = (MobileUser) session.getAttribute(Const.CURRENT_USER);
         if(mobileUser != null){
             return ServerResponse.createBySuccess(mobileUser);
@@ -88,7 +118,12 @@ public class UserController {
      * 存入到data_codeString表
      */
     @PostMapping(value = "/mobile/user/get_smsCodeString.do")
-    public ServerResponse getSmsCodeString(@RequestBody CodeString codeStringModel){
+    public ServerResponse getSmsCodeString(@RequestHeader ("token") String token,
+                                           @RequestBody CodeString codeStringModel){
+        String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"get_smsCodeString.do");
+        if (!AuthToken.checkToken(sourceToken,token)){
+            return ServerResponse.createByErrorMessage("鉴权失败");
+        }
         return mobileUserService.sendSmsCodeString(codeStringModel);
     }
 
@@ -104,8 +139,13 @@ public class UserController {
 
     @PostMapping(value = "/mobile/user/reset_password.do")
     public ServerResponse resetPassword(HttpSession session,
+                                        @RequestHeader ("token") String token,
                                         @RequestHeader("passwordNew") String passwordNew,
                                         @RequestHeader("codeString") String codeString){
+        String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"reset_password.do");
+        if (!AuthToken.checkToken(sourceToken,token)){
+            return ServerResponse.createByErrorMessage("鉴权失败");
+        }
         MobileUser mobileUser = (MobileUser) session.getAttribute(Const.CURRENT_USER);
         if(mobileUser == null){
             return ServerResponse.createByErrorMessage("用户未登录");
@@ -120,8 +160,13 @@ public class UserController {
      */
     @RequestMapping(value = "/mobile/user/forget_reset_password.do")
     public ServerResponse forgetRestPassword(@RequestBody MobileUser mobileUser,
+                                             @RequestHeader ("token") String token,
                                              @RequestHeader("passwordNew") String passwordNew,
                                              @RequestHeader("codeString") String codeString){
+        String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"forget_reset_password.do");
+        if (!AuthToken.checkToken(sourceToken,token)){
+            return ServerResponse.createByErrorMessage("鉴权失败");
+        }
         return mobileUserService.forgetResetPassword(mobileUser,passwordNew,codeString);
     }
 }

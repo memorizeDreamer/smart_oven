@@ -1,6 +1,6 @@
 package com.project.service;
 
-import com.project.repository.MaxDeviceNumRepository;
+import com.project.repository.ConfigureInfoRepository;
 import com.project.response.ServerResponse;
 import com.project.util.DateUtil;
 import com.project.util.FileUtil;
@@ -17,14 +17,14 @@ public class OtherService {
     public String fileRootPath;
 
     @Autowired
-    private MaxDeviceNumRepository maxDeviceNumRepository;
+    private ConfigureInfoRepository configureInfoRepository;
 
     /**
      * 获取最大设备数量
      * @return
      */
     public ServerResponse getMaxDeviceNum(){
-        int maxNum = maxDeviceNumRepository.findMaxDeviceNumById(1);
+        int maxNum = Integer.valueOf(configureInfoRepository.findConfigureInfoByConfigId("max_device_num").getConfigValue());
         return ServerResponse.createBySuccess(maxNum);
     }
 
@@ -33,7 +33,7 @@ public class OtherService {
      */
     public void deleteOldPicture(){
         String currentDay = DateUtil.getCurrentDayString();
-        String filepath = "/Users/liufeng/Pictures/" + "20190804";
+        String filepath = "/Users/liufeng/Pictures/" + currentDay;
         Boolean deleteStatus = FileUtil.delAllFile(filepath);
         FileUtil.delFolder(filepath);
         log.info("删除{}的状态:{}",filepath,deleteStatus);

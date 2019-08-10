@@ -37,18 +37,20 @@ public class FileUtil {
         }
     }
 
-    public static String getFilePath(OvenMobileRelation ovenMobileRelation){
+    public static String getFilePath(OvenMobileRelation ovenMobileRelation, String taskId){
         return DateUtil.getCurrentDayString() + FILE_PATH_SPILT +
                 ovenMobileRelation.getMobileId() + FILE_PATH_SPILT +
                 ovenMobileRelation.getOvenId() + FILE_PATH_SPILT +
+                taskId + FILE_PATH_SPILT +
                 DateUtil.getCurrentSecString() + FILE_NAME_POSTFIX;
     }
 
-    public static String getFilePath(String dayString,String mobileId,String ovenId,String taskId){
+    public static String getFilePath(String dayString,String mobileId,String ovenId,String taskId, String fileName){
         return dayString + FILE_PATH_SPILT +
                 mobileId + FILE_PATH_SPILT +
                 ovenId + FILE_PATH_SPILT +
-                taskId + FILE_NAME_POSTFIX;
+                taskId + FILE_PATH_SPILT +
+                fileName + FILE_NAME_POSTFIX;
     }
 
     public static boolean delAllFile(String path) {

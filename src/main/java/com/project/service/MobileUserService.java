@@ -3,17 +3,23 @@ package com.project.service;
 import com.project.common.Const;
 import com.project.common.SmsInterface;
 import com.project.entity.CodeString;
+import com.project.entity.ConfigureInfo;
 import com.project.entity.MobileUser;
 import com.project.repository.CodeStringRepository;
+import com.project.repository.ConfigureInfoRepository;
 import com.project.repository.MobileUserRepository;
 import com.project.response.ReturnInfo;
 import com.project.response.ServerResponse;
+import com.project.util.DateUtil;
 import com.project.util.MD5Util;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -27,6 +33,12 @@ public class MobileUserService {
 
     @Autowired
     private CodeStringRepository codeStringRepository;
+
+    @Autowired
+    private ConfigureInfoRepository configureInfoRepository;
+
+    @Value("${config.key.max_code_num}")
+    private String maxCodeNumKey;
 
     public ServerResponse login(String username, String password) {
         ServerResponse validResponse = this.checkValid(username,password);
@@ -85,6 +97,12 @@ public class MobileUserService {
         return mobileUser == null;
     }
 
+    /**
+     * 校验用户名和密码
+     * @param username
+     * @param password
+     * @return
+     */
     public ServerResponse<String> checkValid(String username, String password) {
         if (org.apache.commons.lang3.StringUtils.isBlank(username)) {
             return ServerResponse.createByErrorMessage("账号不能为空");
@@ -103,7 +121,6 @@ public class MobileUserService {
             return ServerResponse.createByErrorMessage("密码不能为空");
         }
         String md5Password = MD5Util.MD5Encode(password,"UTF-8");
-
         try {
             mobileUser  = mobileUserRepository.findMobileUserByUsernameAndPassword(username,md5Password);
         } catch (EmptyResultDataAccessException e) {
@@ -186,6 +203,14 @@ public class MobileUserService {
         }
         if (!checkMobileVaild(codeStringModel.getMobileNum())) {
             return ServerResponse.createByErrorMessage("手机号不合法");
+        }
+        List<CodeString> codeStringList = codeStringRepository.findAllByMobileNumAndCreateTimeAfter(codeStringModel.getMobileNum(), DateUtil.beforeHourDate(new Date(),1));
+        int codeStringSendNums = codeStringList.size();
+        log.info("{}已发送验证码次数{}",codeStringModel.getMobileNum(),codeStringSendNums);
+        ConfigureInfo configureInfo = configureInfoRepository.findConfigureInfoByConfigId(maxCodeNumKey);
+        int maxCodeNum = Integer.valueOf(configureInfo.getConfigValue());
+        if (codeStringList != null && maxCodeNum < codeStringSendNums){
+            return ServerResponse.createByErrorMessage("验证码次数过多");
         }
         int max=9999;
         int min=1000;

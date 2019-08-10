@@ -1,12 +1,16 @@
 package com.project.service;
 
+import com.project.common.JPushMessage;
 import com.project.entity.MobileDetailInfo;
 import com.project.entity.OvenDetailInfo;
 import com.project.entity.OvenMobileRelation;
+import com.project.entity.OvenStatus;
 import com.project.repository.MobileDetailInfoRepository;
 import com.project.repository.OvenDetailInfoRepository;
 import com.project.repository.OvenMobileRelationRepository;
+import com.project.repository.OvenStatusRepository;
 import com.project.request.BindRelationRequest;
+import com.project.request.RemoveBindRequest;
 import com.project.response.ServerResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +30,12 @@ public class CommonService {
 
     @Autowired
     private OvenMobileRelationRepository ovenMobileRelationRepository;
+
+    @Autowired
+    private OvenStatusRepository ovenStatusRepository;
+
+    @Autowired
+    private JPushMessage jPushMessage;
 
     /**
      * 绑定设备和手机APP信息
@@ -60,12 +70,16 @@ public class CommonService {
         ovenDetailInfoRepository.save(ovenDetailInfo);
 
         //保存手机端信息
-        MobileDetailInfo mobileDetailInfo = new MobileDetailInfo();
-        mobileDetailInfo.setCreateTime(System.currentTimeMillis());
-        mobileDetailInfo.setMobileId(mobileId);
-        mobileDetailInfo.setTagId(mobileTagId);
-        mobileDetailInfo.setUpdateTime(System.currentTimeMillis());
-        mobileDetailInfoRepository.save(mobileDetailInfo);
+        if (mobileDetailInfoRepository.findMobileDetailInfoByMobileId(mobileId) == null){
+            MobileDetailInfo mobileDetailInfo = new MobileDetailInfo();
+            mobileDetailInfo.setCreateTime(System.currentTimeMillis());
+            mobileDetailInfo.setMobileId(mobileId);
+            mobileDetailInfo.setTagId(mobileTagId);
+            mobileDetailInfo.setUpdateTime(System.currentTimeMillis());
+            mobileDetailInfoRepository.save(mobileDetailInfo);
+        } else {
+            log.info("已存在{}信息",mobileId);
+        }
 
         // 保存手机和设备的绑定关系
         OvenMobileRelation ovenMobileRelation = new OvenMobileRelation();
@@ -73,13 +87,24 @@ public class CommonService {
         ovenMobileRelation.setMobileId(mobileId);
         ovenMobileRelation.setUpdateDate(System.currentTimeMillis());
         ovenMobileRelationRepository.save(ovenMobileRelation);
+
+        // 生成一条在线状态的记录，用于扫描在线状态
+        OvenStatus ovenStatus = new OvenStatus();
+        ovenStatus.setUpdateTime(System.currentTimeMillis());
+        ovenStatus.setOvenId(ovenId);
+        ovenStatus.setIsSend(0);
+        ovenStatusRepository.save(ovenStatus);
+
         return ServerResponse.createBySuccessMessage("绑定成功");
     }
 
-    public ServerResponse removeBindRelationService(BindRelationRequest bindRelationRequest){
-        String mobileId = bindRelationRequest.getMobileId();
-        String ovenId = bindRelationRequest.getOvenId();
+    public ServerResponse removeBindRelationService(RemoveBindRequest removeBindRequest){
+        String mobileId = removeBindRequest.getMobileId();
+        String ovenId = removeBindRequest.getOvenId();
 
+        OvenDetailInfo ovenDetailInfo = ovenDetailInfoRepository.findOvenDetailInfoByOvenId(ovenId);
+        String ovenName = ovenDetailInfo.getOvenName();
+        MobileDetailInfo mobileDetailInfo = mobileDetailInfoRepository.findMobileDetailInfoByMobileId(mobileId);
         // 删除绑定关系
         OvenMobileRelation ovenMobileRelation = ovenMobileRelationRepository.findOvenMobileRelationByMobileIdAndOvenId(mobileId,ovenId);
         if (ovenMobileRelation == null){
@@ -87,7 +112,14 @@ public class CommonService {
         } else {
             ovenMobileRelationRepository.deleteByMobileIdAndAndOvenId(mobileId,ovenId);
             ovenDetailInfoRepository.deleteByOvenId(ovenId);
+            // 并删除用于检测在线状态的记录
+            OvenStatus ovenStatus = ovenStatusRepository.findOvenStatusByOvenId(ovenId);
+            ovenStatusRepository.delete(ovenStatus);
             log.info("删除{}绑定关系成功",ovenId);
+            //如果解绑是由烤箱发起的，需要推送消息给手机
+            if (removeBindRequest.getType() == 1){
+                jPushMessage.jPushMessage(ovenName+"烤箱已主动解绑",mobileDetailInfo.getTagId());
+            }
             return ServerResponse.createBySuccessMessage("解绑成功");
         }
     }
