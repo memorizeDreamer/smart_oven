@@ -114,6 +114,21 @@ public class UserController {
         return ServerResponse.createByErrorMessage("用户未登录,无法获取当前用户的信息");
     }
 
+    @PutMapping(value = "/mobile/user/update_user_info.do")
+    public ServerResponse updateUserInfo(@RequestHeader ("token") String token,
+                                         @RequestBody MobileUser mobileUser,
+                                         HttpSession session){
+        String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"update_user_info.do");
+        if (!AuthToken.checkToken(sourceToken,token)){
+            return ServerResponse.createByErrorMessage("鉴权失败");
+        }
+        MobileUser sessionMobileUser = (MobileUser) session.getAttribute(Const.CURRENT_USER);
+        if(sessionMobileUser == null){
+            return ServerResponse.createByErrorMessage("用户未登录,无法获取当前用户的信息");
+        }
+        return mobileUserService.updateUserInfo(mobileUser, session);
+    }
+
     /*
      * 忘记密码时，先生成短信验证码
      * 随机生成4位数验证码

@@ -21,6 +21,14 @@ public class MobileUser {
 
     private String mobile;
 
+    private String nickname;
+
+    private String sex;
+
+    private String birthday;
+
+    private String address;
+
     @Column(name = "create_time")
     private Long createTime;
 

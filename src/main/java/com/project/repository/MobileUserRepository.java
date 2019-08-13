@@ -14,6 +14,8 @@ public interface MobileUserRepository extends CrudRepository<MobileUser,Integer>
 
     MobileUser findMobileUserByMobile(String mobileNum);
 
+    MobileUser findMobileUserById(int id);
+
     @Transactional
     @Modifying
     @Query("update mobile_user set update_time = ?1 where username = ?2")
@@ -27,5 +29,10 @@ public interface MobileUserRepository extends CrudRepository<MobileUser,Integer>
     @Transactional
     @Modifying
     @Query("update mobile_user set user_image = ?1 , update_time =?2 where username = ?3")
-    int updatePassword(String userImage, Long updateTime, String username);
+    int updateUserImage(String userImage, Long updateTime, String username);
+
+    @Transactional
+    @Modifying
+    @Query("update mobile_user set username=?1 , nickname = ?2 , sex =?3 , birthday=?4 , address=?5 , update_time=?6 where id = ?7")
+    int updateUserInfo(String username, String nickname, String sex, String birthday, String address, Long updateTime, int id);
 }

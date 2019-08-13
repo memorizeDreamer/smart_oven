@@ -14,6 +14,7 @@ import com.project.util.DateUtil;
 import com.project.util.FileUtil;
 import com.project.util.MD5Util;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.util.Date;
 import java.util.List;
@@ -104,6 +106,16 @@ public class MobileUserService {
     public Boolean checkMobileIsResgister(String mobileNum){
         MobileUser mobileUser = mobileUserRepository.findMobileUserByMobile(mobileNum);
         return mobileUser == null;
+    }
+
+    public ServerResponse updateUserInfo(MobileUser mobileUser, HttpSession session){
+        mobileUser.setUpdateTime(System.currentTimeMillis());
+        mobileUserRepository.updateUserInfo(mobileUser.getUsername(),mobileUser.getNickname(),mobileUser.getSex(),mobileUser.getBirthday(),mobileUser.getAddress(),System.currentTimeMillis(),mobileUser.getId());
+        session.removeAttribute(Const.CURRENT_USER);
+        MobileUser sessionUser = mobileUserRepository.findMobileUserById(mobileUser.getId());
+        sessionUser.setPassword(StringUtils.EMPTY);
+        session.setAttribute(Const.CURRENT_USER, sessionUser);
+        return ServerResponse.createBySuccessMessage("更新成功");
     }
 
     /**
@@ -331,7 +343,7 @@ public class MobileUserService {
             return ServerResponse.createByError(ReturnInfo.EMPTY_PIC_ERROR.getMsg());
         }
         // 上传完成之后，需要更新用户图像记录
-        mobileUserRepository.updatePassword(USER_HEAD_IMAGE+username,System.currentTimeMillis(),username);
+        mobileUserRepository.updateUserImage(USER_HEAD_IMAGE+username,System.currentTimeMillis(),username);
         return ServerResponse.createBySuccessMessage("上传图像成功");
     }
 
