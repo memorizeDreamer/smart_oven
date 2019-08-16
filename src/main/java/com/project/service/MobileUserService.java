@@ -335,7 +335,7 @@ public class MobileUserService {
     }
 
     public ServerResponse uploadUserImage(String username,MultipartFile file){
-        String filepath = fileRootPath + username + "/head_image.jpg";
+        String filepath = fileRootPath + username + "/head/head_image.jpg";
         try {
             FileInputStream fileInputStream = (FileInputStream) file.getInputStream();
             FileUtil.writeFile(filepath,fileInputStream);
