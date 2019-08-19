@@ -150,6 +150,10 @@ public class OvenMobileRelationService {
                 offLineOvenSet.add(ovenStatus.getOvenId());
                 ServerResponse serverResponse = jPushMessage.jPushMessage(ovenName+"断开连接",mobileDetailInfo.getTagId());
                 if (!serverResponse.isSuccess()){
+                    //推送成功后，更新send状态为1
+                    ovenStatusRepository.updateIsSend(2,ovenStatus.getOvenId());
+                    // 并更新设备状态为离线
+                    ovenDetailInfoRepository.updateOvenOffLine(1,ovenStatus.getOvenId());
                     log.error("{}推送失败:{}",ovenStatus.getOvenId(),serverResponse.getErrorMessage());
                 } else {
                     //推送成功后，更新send状态为1

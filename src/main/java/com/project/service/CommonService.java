@@ -10,9 +10,12 @@ import com.project.repository.OvenDetailInfoRepository;
 import com.project.repository.OvenMobileRelationRepository;
 import com.project.repository.OvenStatusRepository;
 import com.project.request.BindRelationRequest;
+import com.project.request.BindTransformToOven;
 import com.project.request.RemoveBindRequest;
 import com.project.response.ServerResponse;
+import com.project.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +50,7 @@ public class CommonService {
         String ovenTagId = bindRelationRequest.getOvenTagId();
         String mobileTagId = bindRelationRequest.getMobileTagId();
         String ovenName = bindRelationRequest.getOvenName();
+        String groupId = bindRelationRequest.getGroupId();
 
         //查看改手机已经绑定的数量
         List<OvenMobileRelation> ovenMobileRelationList = ovenMobileRelationRepository.findOvenMobileRelationByMobileIdOrderByUpdateDateDesc(mobileId);
@@ -65,6 +69,7 @@ public class CommonService {
         ovenDetailInfo.setOvenId(ovenId);
         ovenDetailInfo.setOvenName(ovenName);
         ovenDetailInfo.setTagId(ovenTagId);
+        ovenDetailInfo.setGroupId(groupId);
         ovenDetailInfo.setCreateTime(System.currentTimeMillis());
         ovenDetailInfo.setUpdateTime(System.currentTimeMillis());
         ovenDetailInfoRepository.save(ovenDetailInfo);
@@ -95,6 +100,9 @@ public class CommonService {
         ovenStatus.setIsSend(0);
         ovenStatusRepository.save(ovenStatus);
 
+        // 绑定成功后，需要把消息推送给烤箱
+        BindTransformToOven bindTransformToOven = new BindTransformToOven(ovenId,ovenName,0,"绑定成功");
+        jPushMessage.jPushMessage(JsonUtils.getStrFromObject(bindTransformToOven),ovenTagId);
         return ServerResponse.createBySuccessMessage("绑定成功");
     }
 
@@ -104,23 +112,25 @@ public class CommonService {
 
         OvenDetailInfo ovenDetailInfo = ovenDetailInfoRepository.findOvenDetailInfoByOvenId(ovenId);
         String ovenName = ovenDetailInfo.getOvenName();
-        MobileDetailInfo mobileDetailInfo = mobileDetailInfoRepository.findMobileDetailInfoByMobileId(mobileId);
-        // 删除绑定关系
-        OvenMobileRelation ovenMobileRelation = ovenMobileRelationRepository.findOvenMobileRelationByMobileIdAndOvenId(mobileId,ovenId);
+        OvenMobileRelation ovenMobileRelation = ovenMobileRelationRepository.findOvenMobileRelationByOvenId(ovenId);
         if (ovenMobileRelation == null){
             return ServerResponse.createByErrorMessage("没有已绑定的信息");
-        } else {
-            ovenMobileRelationRepository.deleteByMobileIdAndAndOvenId(mobileId,ovenId);
-            ovenDetailInfoRepository.deleteByOvenId(ovenId);
-            // 并删除用于检测在线状态的记录
-            OvenStatus ovenStatus = ovenStatusRepository.findOvenStatusByOvenId(ovenId);
-            ovenStatusRepository.delete(ovenStatus);
-            log.info("删除{}绑定关系成功",ovenId);
-            //如果解绑是由烤箱发起的，需要推送消息给手机
-            if (removeBindRequest.getType() == 1){
-                jPushMessage.jPushMessage(ovenName+"烤箱已主动解绑",mobileDetailInfo.getTagId());
-            }
-            return ServerResponse.createBySuccessMessage("解绑成功");
         }
+        if (StringUtils.isBlank(mobileId)){
+            mobileId = ovenMobileRelation.getMobileId();
+        }
+        MobileDetailInfo mobileDetailInfo = mobileDetailInfoRepository.findMobileDetailInfoByMobileId(mobileId);
+
+        ovenMobileRelationRepository.deleteByMobileIdAndAndOvenId(mobileId,ovenId);
+        ovenDetailInfoRepository.deleteByOvenId(ovenId);
+        // 并删除用于检测在线状态的记录
+        OvenStatus ovenStatus = ovenStatusRepository.findOvenStatusByOvenId(ovenId);
+        ovenStatusRepository.delete(ovenStatus);
+        log.info("删除{}绑定关系成功",ovenId);
+        //如果解绑是由烤箱发起的，需要推送消息给手机
+        if (removeBindRequest.getType() == 1){
+            jPushMessage.jPushMessage(ovenName+"烤箱已主动解绑",mobileDetailInfo.getTagId());
+        }
+        return ServerResponse.createBySuccessMessage("解绑成功");
     }
 }

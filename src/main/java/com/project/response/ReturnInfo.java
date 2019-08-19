@@ -3,7 +3,7 @@ package com.project.response;
 
 public enum ReturnInfo {
 
-    OPERATION_SUCCESS("操作成功", 200),
+    OPERATION_SUCCESS("操作成功", 204),
     OPERATION_FAIL("操作失败", 400),
     NEED_LOGIN("NEED_LOGIN",10000),
     EMPTY_PIC_ERROR("上传的图片为空或文件传输错误",10001),

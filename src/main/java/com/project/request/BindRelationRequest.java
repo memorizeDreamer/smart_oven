@@ -18,9 +18,15 @@ public class BindRelationRequest {
     @JsonProperty(value = "oven_tag_id")
     private String ovenTagId;
 
-    @JsonProperty("mobile_tag_id")
+    @JsonProperty(value = "mobile_tag_id")
     private String mobileTagId;
 
-    @JsonProperty("oven_name")
+    @JsonProperty(value = "oven_name")
     private String ovenName;
+
+    @JsonProperty(value = "group_id")
+    private String groupId;
+
+    @JsonProperty(value = "serial_number")
+    private String serialNumber;
 }
