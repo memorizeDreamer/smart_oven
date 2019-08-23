@@ -45,10 +45,14 @@ public class FileUtil {
                 DateUtil.getCurrentSecString() + FILE_NAME_POSTFIX;
     }
 
-    public static String getFilePath(String dayString,String mobileId,String ovenId,String taskId, String fileName){
+    public static String getFilePath(String dayString,String mobileId,String ovenId){
         return dayString + FILE_PATH_SPILT +
                 mobileId + FILE_PATH_SPILT +
-                ovenId + FILE_PATH_SPILT +
+                ovenId + FILE_PATH_SPILT;
+    }
+
+    public static String getFilePath(String dayString,String mobileId,String ovenId,String taskId, String fileName){
+        return getFilePath(dayString,mobileId,ovenId) +
                 taskId + FILE_PATH_SPILT +
                 fileName + FILE_NAME_POSTFIX;
     }

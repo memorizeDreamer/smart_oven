@@ -13,12 +13,20 @@ import com.project.request.BindRelationRequest;
 import com.project.request.BindTransformToOven;
 import com.project.request.RemoveBindRequest;
 import com.project.response.ServerResponse;
+import com.project.util.FileUtil;
 import com.project.util.JsonUtils;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -39,6 +47,11 @@ public class CommonService {
 
     @Autowired
     private JPushMessage jPushMessage;
+
+    private final static String GET_PICTURE_ROOT_URL = "http://47.103.85.203:8090/mobile/process/getPicture/";
+
+    @Value("${file.picture.path}")
+    public String fileRootPath;
 
     /**
      * 绑定设备和手机APP信息
@@ -132,5 +145,99 @@ public class CommonService {
             jPushMessage.jPushMessage(ovenName+"烤箱已主动解绑",mobileDetailInfo.getTagId());
         }
         return ServerResponse.createBySuccessMessage("解绑成功");
+    }
+
+    /**
+     * 获取某个烤箱下的时间段图片
+     * @param startTime
+     * @param endTime
+     * @param ovenId
+     * @return
+     */
+    public ServerResponse getAllImageService(String startTime, String endTime, String ovenId,String mobileId){
+        if (!StringUtils.isBlank(startTime) && !StringUtils.isBlank(endTime)) {
+            List<String> dayList = new ArrayList<>();
+            try {
+                int startDay = Integer.valueOf(startTime);
+                int endDay = Integer.valueOf(endTime);
+                int index = 0;
+                int count = endDay - startDay;
+                if (count < 0){
+                    log.error("开始时间{}==结束时间{}解析出错",startTime,endTime);
+                    return ServerResponse.createByErrorMessage("参数错误");
+                }
+                do {
+                    dayList.add(String.valueOf(startDay+index));
+                    index++;
+                } while (count >= index);
+            } catch (Exception e){
+                log.error("开始时间{}==结束时间{}解析出错",startTime,endTime);
+                return ServerResponse.createByErrorMessage("参数错误");
+            }
+            List<ImageEntity> returnList = new ArrayList<>();
+            for (String s : dayList){
+                String filePath = fileRootPath + FileUtil.getFilePath(s, mobileId, ovenId);
+                File file = new File(filePath);
+                String[] taskFileNames = file.list(); // 所有taskId
+                returnList.add(getImageEntity(s,taskFileNames,FileUtil.getFilePath(s, mobileId, ovenId)));
+            }
+            return ServerResponse.createBySuccess(returnList);
+        } else {
+            return ServerResponse.createByErrorMessage("参数错误");
+        }
+    }
+
+    private ImageEntity getImageEntity(String dateTime, String[] taskFileNames,String filepath){
+        ImageEntity imageEntity = new ImageEntity();
+        imageEntity.setDatetime(dateTime);
+        List<ImageEntity.ImageMsg> imageMsgList = new ArrayList<>();
+        if (taskFileNames == null){
+            imageEntity.setImages(imageMsgList);
+            return imageEntity;
+        }
+
+        for (int i=0;i<taskFileNames.length;i++){
+            ImageEntity.ImageMsg imageMsg = new ImageEntity.ImageMsg();
+            String newFilePath = fileRootPath + filepath + taskFileNames[i];// 每个taskId的目录
+            File file = new File(newFilePath);
+            String[] imageFileNames = file.list(); // 所有taskId
+
+            if (imageFileNames == null){
+                log.info("{}下没有图片",taskFileNames[i]);
+                continue;
+            }
+            List<String> fileUrlLists = new ArrayList<>();
+            for (int j=0;j<imageFileNames.length;j++){
+                String url = GET_PICTURE_ROOT_URL + filepath +"/"+ taskFileNames[i] +"/"+ imageFileNames[j].replace(".jpg","");
+                fileUrlLists.add(url);
+            }
+            imageMsg.setImageUrlLit(fileUrlLists);
+            imageMsg.setTaskId(taskFileNames[i]);
+            imageMsgList.add(imageMsg);
+        }
+        imageEntity.setImages(imageMsgList);
+        return imageEntity;
+    }
+
+//    public static void main(String[] args){
+//        new CommonService().getAllImageService("20190808","20190809","first_oven","15900959412");
+//    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ImageEntity{
+        private String datetime;
+
+        private List<ImageMsg> images;
+
+        @Data
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class ImageMsg{
+            private String taskId;
+
+            private List<String> imageUrlLit;
+        }
     }
 }

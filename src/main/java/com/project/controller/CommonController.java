@@ -40,4 +40,17 @@ public class CommonController {
         }
         return commonService.removeBindRelationService(removeBindRequest);
     }
+
+    @PostMapping("/common/mobile/get_all_images.do")
+    public ServerResponse getAllImages(@RequestHeader("token")String token,
+                                       @RequestHeader("start_time")String startTime,
+                                       @RequestHeader("end_time")String endTime,
+                                       @RequestHeader("oven_id")String ovenId,
+                                       @RequestHeader("mobile_id")String mobileId){
+        String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"get_all_images.do");
+        if (!AuthToken.checkToken(sourceToken,token)){
+            return ServerResponse.createByErrorMessage("鉴权失败");
+        }
+        return commonService.getAllImageService(startTime,endTime,ovenId,mobileId);
+    }
 }

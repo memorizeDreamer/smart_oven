@@ -147,6 +147,10 @@ public class OvenMobileRelationService {
                     log.info("{}已发送过状态，不需要再发送",ovenName);
                     continue;
                 }
+                if (ovenStatus.getIsSend() == 2){
+                    log.info("{}上次发送失败，不需要再发送",ovenName);
+                    continue;
+                }
                 offLineOvenSet.add(ovenStatus.getOvenId());
                 ServerResponse serverResponse = jPushMessage.jPushMessage(ovenName+"断开连接",mobileDetailInfo.getTagId());
                 if (!serverResponse.isSuccess()){
