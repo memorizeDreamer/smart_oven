@@ -2,6 +2,7 @@ package com.project.service;
 
 import com.project.common.JPushMessage;
 import com.project.entity.*;
+import com.project.message.JPushMessageEntity;
 import com.project.repository.MobileDetailInfoRepository;
 import com.project.repository.OvenDetailInfoRepository;
 import com.project.repository.OvenMobileRelationRepository;
@@ -70,9 +71,11 @@ public class OvenMobileRelationService {
         } catch (IOException e) {
             return ServerResponse.createByError(ReturnInfo.EMPTY_PIC_ERROR.getMsg());
         }
+        String mobileId = ovenMobileRelation.getMobileId();
+        MobileDetailInfo mobileDetailInfo = mobileDetailInfoRepository.findMobileDetailInfoByMobileId(mobileId);
         String url = GET_PICTURE_ROOT_URL + fileSavePath.replace(".jpg","");
-        OvenDetailInfo ovenDetailInfo = ovenDetailInfoRepository.findOvenDetailInfoByOvenId(ovenId);
-        return jPushMessage.jPushMessage(url,ovenDetailInfo.getTagId());
+        JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,mobileId,5,url);
+        return jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),mobileDetailInfo.getTagId());
     }
 
     /**
@@ -91,7 +94,8 @@ public class OvenMobileRelationService {
         if (mobileDetailInfo == null){
             return ServerResponse.createByError(ReturnInfo.UNKNOWN_DEVICE.getMsg());
         }
-        return jPushMessage.jPushMessage(JsonUtils.getStrFromObject(transformRequest),mobileDetailInfo.getTagId());
+        JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,mobileId,7,JsonUtils.getStrFromObject(transformRequest));
+        return jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),mobileDetailInfo.getTagId());
     }
 
     /**
@@ -112,7 +116,8 @@ public class OvenMobileRelationService {
                 OvenDetailInfo ovenDetailInfo = ovenDetailInfoRepository.findOvenDetailInfoByOvenId(ovenId);
                 OvenMobileRelation ovenMobileRelation = ovenMobileRelationRepository.findOvenMobileRelationByOvenId(ovenId);
                 MobileDetailInfo mobileDetailInfo = mobileDetailInfoRepository.findMobileDetailInfoByMobileId(ovenMobileRelation.getMobileId());
-                jPushMessage.jPushMessage(ovenDetailInfo.getOvenName()+"设备已上线",mobileDetailInfo.getTagId());
+                JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,null,3,ovenDetailInfo.getOvenName()+"设备已上线");
+                jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),mobileDetailInfo.getTagId());
                 //推送完成之后，需要从offLineOvenSet中删除，并更新is_send字段为0
                 offLineOvenSet.remove(ovenId);
                 // 设备上线，则更新设备状态
@@ -152,7 +157,8 @@ public class OvenMobileRelationService {
                     log.info("{}上次发送失败，不需要再发送",ovenName);
                     continue;
                 }
-                ServerResponse serverResponse = jPushMessage.jPushMessage(ovenName+"断开连接",mobileDetailInfo.getTagId());
+                JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenDetailInfo.getOvenId(),mobileDetailInfo.getMobileId(),4,ovenDetailInfo.getOvenName()+"设备已断开连接");
+                ServerResponse serverResponse = jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),mobileDetailInfo.getTagId());
                 if (!serverResponse.isSuccess()){
                     //推送成功后，更新send状态为1
                     ovenStatusRepository.updateIsSend(2,ovenStatus.getOvenId());

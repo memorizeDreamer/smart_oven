@@ -5,6 +5,7 @@ import com.project.entity.MobileDetailInfo;
 import com.project.entity.OvenDetailInfo;
 import com.project.entity.OvenMobileRelation;
 import com.project.entity.OvenStatus;
+import com.project.message.JPushMessageEntity;
 import com.project.repository.MobileDetailInfoRepository;
 import com.project.repository.OvenDetailInfoRepository;
 import com.project.repository.OvenMobileRelationRepository;
@@ -132,8 +133,8 @@ public class CommonService {
         ovenStatusRepository.save(ovenStatus);
 
         // 绑定成功后，需要把消息推送给烤箱
-        BindTransformToOven bindTransformToOven = new BindTransformToOven(ovenId,ovenName,0,"绑定成功");
-        jPushMessage.jPushMessage(JsonUtils.getStrFromObject(bindTransformToOven),ovenTagId);
+        JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,mobileId,1,"绑定成功");
+        jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),ovenTagId);
         return ServerResponse.createBySuccessMessage("绑定成功");
     }
 
@@ -165,7 +166,8 @@ public class CommonService {
         log.info("删除{}绑定关系成功",ovenId);
         //如果解绑是由烤箱发起的，需要推送消息给手机
         if (removeBindRequest.getType() == 1){
-            jPushMessage.jPushMessage(ovenName+"烤箱已主动解绑",mobileDetailInfo.getTagId());
+            JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,mobileId,1,ovenName+"烤箱已主动解绑");
+            jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),mobileDetailInfo.getTagId());
         }
         return ServerResponse.createBySuccessMessage("解绑成功");
     }

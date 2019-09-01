@@ -4,6 +4,7 @@ import com.project.common.JPushMessage;
 import com.project.entity.OvenDetailInfo;
 import com.project.entity.OvenMobileRelation;
 import com.project.entity.TransFormRecord;
+import com.project.message.JPushMessageEntity;
 import com.project.repository.TransformRecordRepository;
 import com.project.request.TransformRequest;
 import com.project.repository.OvenDetailInfoRepository;
@@ -86,7 +87,8 @@ public class MobileAppService {
             return ServerResponse.createByReturnInfo(ReturnInfo.DEVICE_ISRUNNING);
         }
         // 更新烤箱状态
-        ServerResponse serverResponse = jPushMessage.jPushMessage(JsonUtils.getStrFromObject(transformRequest),ovenDetailInfo.getTagId());
+        JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,null,6,JsonUtils.getStrFromObject(transformRequest));
+        ServerResponse serverResponse = jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),ovenDetailInfo.getTagId());
         if (serverResponse.isSuccess()){
             int status = transformRequest.getStatus();
             ovenDetailInfoRepository.updateOvenStatus(status,ovenId);
