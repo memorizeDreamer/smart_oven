@@ -1,5 +1,6 @@
 package com.project.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,4 +42,25 @@ public class OvenDetailInfo {
 
     @Column(name = "oven_online")
     private int ovenOnline; // 0-在线  1-离线
+
+    @Column(name = "nickname")
+    private String nickname; // 烤箱昵称
+
+    @Column(name = "oven_model")
+    private String ovenModel;// 烤箱型号
+
+    @Column(name = "oven_brand")
+    private String ovenBrand; // 烤箱品牌
+
+    @Column(name = "avata")
+    private String avata; // 烤箱用户图像
+
+    @Column(name = "sex")
+    private int sex; // 性别 性别1=>男，2=>女
+
+    @Column(name = "birth")
+    private String birth; // 生日
+
+    @Column(name = "address")
+    private String address; // 地址
 }

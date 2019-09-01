@@ -13,6 +13,7 @@ import com.project.request.BindRelationRequest;
 import com.project.request.BindTransformToOven;
 import com.project.request.RemoveBindRequest;
 import com.project.response.ServerResponse;
+import com.project.util.DateUtil;
 import com.project.util.FileUtil;
 import com.project.util.JsonUtils;
 import lombok.AllArgsConstructor;
@@ -25,8 +26,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -65,6 +68,14 @@ public class CommonService {
         String ovenName = bindRelationRequest.getOvenName();
         String groupId = bindRelationRequest.getGroupId();
 
+        int sex = bindRelationRequest.getSex();
+        String birthday = bindRelationRequest.getBirth();
+        String address  = bindRelationRequest.getAddress();
+        String ovenModel = bindRelationRequest.getOvenModel();
+        String ovenBrand = bindRelationRequest.getOvenBrand();
+        String nickname = bindRelationRequest.getNickname();
+        String avata = bindRelationRequest.getAvata();
+
         //查看改手机已经绑定的数量
         List<OvenMobileRelation> ovenMobileRelationList = ovenMobileRelationRepository.findOvenMobileRelationByMobileIdOrderByUpdateDateDesc(mobileId);
         log.info("找到{}已经绑定的数量{}",mobileId,ovenMobileRelationList.size());
@@ -83,6 +94,13 @@ public class CommonService {
         ovenDetailInfo.setOvenName(ovenName);
         ovenDetailInfo.setTagId(ovenTagId);
         ovenDetailInfo.setGroupId(groupId);
+        ovenDetailInfo.setAddress(address);
+        ovenDetailInfo.setNickname(nickname);
+        ovenDetailInfo.setAvata(avata);
+        ovenDetailInfo.setSex(sex);
+        ovenDetailInfo.setOvenModel(ovenModel);
+        ovenDetailInfo.setOvenBrand(ovenBrand);
+        ovenDetailInfo.setBirth(birthday);
         ovenDetailInfo.setCreateTime(System.currentTimeMillis());
         ovenDetailInfo.setUpdateTime(System.currentTimeMillis());
         ovenDetailInfoRepository.save(ovenDetailInfo);
@@ -124,7 +142,12 @@ public class CommonService {
         String ovenId = removeBindRequest.getOvenId();
 
         OvenDetailInfo ovenDetailInfo = ovenDetailInfoRepository.findOvenDetailInfoByOvenId(ovenId);
-        String ovenName = ovenDetailInfo.getOvenName();
+        String ovenName = null;
+        if (ovenDetailInfo == null){
+            log.info("{}:没有该设备的详细信息",ovenId);
+        }else {
+            ovenName = ovenDetailInfo.getOvenName();
+        }
         OvenMobileRelation ovenMobileRelation = ovenMobileRelationRepository.findOvenMobileRelationByOvenId(ovenId);
         if (ovenMobileRelation == null){
             return ServerResponse.createByErrorMessage("没有已绑定的信息");
@@ -156,18 +179,21 @@ public class CommonService {
      */
     public ServerResponse getAllImageService(String startTime, String endTime, String ovenId,String mobileId){
         if (!StringUtils.isBlank(startTime) && !StringUtils.isBlank(endTime)) {
+            String currentDay = new SimpleDateFormat("yyyyMMdd").format(new Date());
+            if (currentDay.compareTo(endTime) < 0 ){
+                return ServerResponse.createByErrorMessage("结束日期超过当前日期");
+            }
             List<String> dayList = new ArrayList<>();
             try {
-                int startDay = Integer.valueOf(startTime);
-                int endDay = Integer.valueOf(endTime);
                 int index = 0;
-                int count = endDay - startDay;
+                long count = DateUtil.getDiffDay(startTime,endTime);
                 if (count < 0){
                     log.error("开始时间{}==结束时间{}解析出错",startTime,endTime);
                     return ServerResponse.createByErrorMessage("参数错误");
                 }
                 do {
-                    dayList.add(String.valueOf(startDay+index));
+                    long dayNum = DateUtil.afterDayDate(startTime,index);
+                    dayList.add(new SimpleDateFormat("yyyyMMdd").format(new Date(dayNum)));
                     index++;
                 } while (count >= index);
             } catch (Exception e){

@@ -143,6 +143,7 @@ public class OvenMobileRelationService {
                 String ovenName = ovenDetailInfo.getOvenName();
                 log.info("{}设备处于离线状态",ovenName);
                 // 为1表示当前记录已经发送不需要再次发送，但是需要
+                offLineOvenSet.add(ovenStatus.getOvenId());
                 if (ovenStatus.getIsSend() == 1){
                     log.info("{}已发送过状态，不需要再发送",ovenName);
                     continue;
@@ -151,7 +152,6 @@ public class OvenMobileRelationService {
                     log.info("{}上次发送失败，不需要再发送",ovenName);
                     continue;
                 }
-                offLineOvenSet.add(ovenStatus.getOvenId());
                 ServerResponse serverResponse = jPushMessage.jPushMessage(ovenName+"断开连接",mobileDetailInfo.getTagId());
                 if (!serverResponse.isSuccess()){
                     //推送成功后，更新send状态为1

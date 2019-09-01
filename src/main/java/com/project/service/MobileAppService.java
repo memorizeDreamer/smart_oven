@@ -3,6 +3,8 @@ package com.project.service;
 import com.project.common.JPushMessage;
 import com.project.entity.OvenDetailInfo;
 import com.project.entity.OvenMobileRelation;
+import com.project.entity.TransFormRecord;
+import com.project.repository.TransformRecordRepository;
 import com.project.request.TransformRequest;
 import com.project.repository.OvenDetailInfoRepository;
 import com.project.repository.OvenMobileRelationRepository;
@@ -31,6 +33,9 @@ public class MobileAppService {
 
     @Autowired
     private OvenDetailInfoRepository ovenDetailInfoRepository;
+
+    @Autowired
+    private TransformRecordRepository transformRecordRepository;
 
     @Autowired
     private JPushMessage jPushMessage;
@@ -76,16 +81,26 @@ public class MobileAppService {
             return ServerResponse.createByReturnInfo(ReturnInfo.DEVICE_UNCONNECT);
         }
         // TODO 烤箱正在操作时候，需要烤箱返回一个识别码
-//        if (ovenDetailInfo.getOvenStatus() == 1 && transformRequest.getStatus() == 1){
-//            // 设备正在运行中,并且推送的状态也是让烤箱运行，则返回正在运行
-//            return ServerResponse.createByReturnInfo(ReturnInfo.DEVICE_ISRUNNING);
-//        }
+        if (ovenDetailInfo.getOvenStatus() == 1 && transformRequest.getStatus() == 1){
+            // 设备正在运行中,并且推送的状态也是让烤箱运行，则返回正在运行
+            return ServerResponse.createByReturnInfo(ReturnInfo.DEVICE_ISRUNNING);
+        }
         // 更新烤箱状态
         ServerResponse serverResponse = jPushMessage.jPushMessage(JsonUtils.getStrFromObject(transformRequest),ovenDetailInfo.getTagId());
         if (serverResponse.isSuccess()){
             int status = transformRequest.getStatus();
             ovenDetailInfoRepository.updateOvenStatus(status,ovenId);
         }
+        //存下发送记录
+        TransFormRecord transFormRecord = new TransFormRecord();
+        transFormRecord.setCreateTime(System.currentTimeMillis());
+        transFormRecord.setDowntempture(transformRequest.getDowntempture());
+        transFormRecord.setModel(transformRequest.getModel());
+        transFormRecord.setOvenId(transformRequest.getId());
+        transFormRecord.setTime(transformRequest.getTime());
+        transFormRecord.setTo(transformRequest.getTo());
+        transFormRecord.setStatus(transformRequest.getStatus());
+        transformRecordRepository.save(transFormRecord);
         return serverResponse;
     }
 
