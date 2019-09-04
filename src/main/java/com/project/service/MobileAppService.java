@@ -14,6 +14,7 @@ import com.project.response.ServerResponse;
 import com.project.util.FileUtil;
 import com.project.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -63,11 +64,15 @@ public class MobileAppService {
 
     /**
      * 手机APP推送消息给设备
-     * @param ovenId
      * @param transformRequest
      * @return
      */
-    public ServerResponse transformData(String ovenId, TransformRequest transformRequest){
+    public ServerResponse transformData(TransformRequest transformRequest){
+        String ovenId = transformRequest.getId();
+        String mobileId = transformRequest.getMobileId();
+        if (StringUtils.isBlank(ovenId) || StringUtils.isBlank(mobileId)){
+            return ServerResponse.createByErrorMessage("请传图烤箱ID和手机ID");
+        }
         OvenMobileRelation ovenMobileRelation = ovenMobileRelationRepository.findOvenMobileRelationByOvenId(ovenId);
         if (ovenMobileRelation == null){
             return ServerResponse.createByError(ReturnInfo.UNKNOWN_DEVICE.getMsg());
@@ -81,16 +86,24 @@ public class MobileAppService {
             //设备断网
             return ServerResponse.createByReturnInfo(ReturnInfo.DEVICE_UNCONNECT);
         }
-        // TODO 烤箱正在操作时候，需要烤箱返回一个识别码
-        if (ovenDetailInfo.getOvenStatus() == 1 && transformRequest.getStatus() == 1){
-            // 设备正在运行中,并且推送的状态也是让烤箱运行，则返回正在运行
-            return ServerResponse.createByReturnInfo(ReturnInfo.DEVICE_ISRUNNING);
-        }
-        // 更新烤箱状态
-        JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,null,6,JsonUtils.getStrFromObject(transformRequest));
-        ServerResponse serverResponse = jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),ovenDetailInfo.getTagId());
-        if (serverResponse.isSuccess()){
-            int status = transformRequest.getStatus();
+        // 如果是手机向烤箱发送启动指令，则会判断烤箱是否正在运行
+        int status = transformRequest.getStatus();
+        if (transformRequest.getTo() == 1){
+            if (transformRequest.getStatus() == 1){
+                if (ovenDetailInfo.getOvenStatus() == 1){
+                    return ServerResponse.createByReturnInfo(ReturnInfo.DEVICE_ISRUNNING);
+                }
+            }
+            // 更新烤箱状态
+            JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,null,6,JsonUtils.getStrFromObject(transformRequest));
+            ServerResponse serverResponse = jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),ovenDetailInfo.getTagId());
+            if (serverResponse.isSuccess()){
+                ovenDetailInfoRepository.updateOvenStatus(status,ovenId);
+            }
+        } else {
+            if (status != 0){
+                return ServerResponse.createByErrorMessage("烤箱只能发送关闭状态");
+            }
             ovenDetailInfoRepository.updateOvenStatus(status,ovenId);
         }
         //存下发送记录
@@ -101,9 +114,10 @@ public class MobileAppService {
         transFormRecord.setOvenId(transformRequest.getId());
         transFormRecord.setTime(transformRequest.getTime());
         transFormRecord.setTo(transformRequest.getTo());
+        transFormRecord.setMobileId(transformRequest.getMobileId());
         transFormRecord.setStatus(transformRequest.getStatus());
         transformRecordRepository.save(transFormRecord);
-        return serverResponse;
+        return ServerResponse.createBySuccess();
     }
 
     /**

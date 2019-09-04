@@ -22,6 +22,9 @@ public class TransFormRecord {
     @Column(name = "oven_id")
     private String ovenId;//烤箱ID
 
+    @Column(name = "mobile_id")
+    private String mobileId;
+
     @Column(name = "transform_to")
     private int to;//传输方向：0 烤箱app向服务器传送 1 手机app向服务器传送
 

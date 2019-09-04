@@ -10,7 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TransformRequest {
     @JsonProperty(value = "ID")
-    private String id;//烤箱ID
+    private String id;//烤箱ID，如果是烤箱想手机发送，可以不传
+
+    @JsonProperty(value = "Mobile_ID")
+    private String mobileId;// 手机id ，如果是手机向烤箱发送，可以不传
 
     @JsonProperty(value = "TO")
     private int to;//传输方向：0 烤箱app向服务器传送 1 手机app向服务器传送

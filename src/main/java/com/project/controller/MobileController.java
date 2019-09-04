@@ -29,14 +29,13 @@ public class MobileController {
     }
 
     @PostMapping("/mobile/process/transform.do")
-    public ServerResponse transformData(@RequestHeader("oven_id") String ovenId,
-                                        @RequestHeader("token") String token,
+    public ServerResponse transformData(@RequestHeader("token") String token,
                                         @RequestBody TransformRequest transformRequest){
         String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"transform.do");
         if (!AuthToken.checkToken(sourceToken,token)){
             return ServerResponse.createByErrorMessage("鉴权失败");
         }
-        return mobileAppService.transformData(ovenId,transformRequest);
+        return mobileAppService.transformData(transformRequest);
     }
 
     @PostMapping("/mobile/process/report_device.do")
