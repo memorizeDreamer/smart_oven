@@ -3,10 +3,7 @@ package com.project.service;
 import com.project.common.JPushMessage;
 import com.project.entity.*;
 import com.project.message.JPushMessageEntity;
-import com.project.repository.MobileDetailInfoRepository;
-import com.project.repository.OvenDetailInfoRepository;
-import com.project.repository.OvenMobileRelationRepository;
-import com.project.repository.OvenStatusRepository;
+import com.project.repository.*;
 import com.project.request.TransformRequest;
 import com.project.response.ReturnInfo;
 import com.project.response.ServerResponse;
@@ -45,9 +42,14 @@ public class OvenMobileRelationService {
     private OvenStatusRepository ovenStatusRepository;
 
     @Autowired
+    private ImageInfoRepository imageInfoRepository;
+
+    @Autowired
     private JPushMessage jPushMessage;
 
     public Set<String> offLineOvenSet = new HashSet<>();
+
+    private static final String UNKNOWN_MOBILE_PIC = "unknown";
 
     /**
      * 设备上传图片，并把回去图片的连接推送给手机APP
@@ -55,15 +57,19 @@ public class OvenMobileRelationService {
      * @param multipartFile
      * @return
      */
-    public ServerResponse collectPicture(String ovenId, MultipartFile multipartFile, String taskId){
+    public ServerResponse collectPicture(String ovenId, MultipartFile multipartFile, String taskId, int isNeedSend){
         if (multipartFile == null){
             return ServerResponse.createByError(ReturnInfo.EMPTY_PIC_ERROR.getMsg());
         }
         OvenMobileRelation ovenMobileRelation = ovenMobileRelationRepository.findOvenMobileRelationByOvenId(ovenId);
-        if (ovenMobileRelation == null){
+        if (ovenMobileRelation == null && isNeedSend == 1){
             return ServerResponse.createByError(ReturnInfo.UNKNOWN_DEVICE.getMsg());
         }
+        String mobileId = ovenMobileRelation == null ?UNKNOWN_MOBILE_PIC : ovenMobileRelation.getMobileId();
         String fileSavePath = FileUtil.getFilePath(ovenMobileRelation,taskId); // 用于推送给手机APP
+        if (isNeedSend == 0){
+            fileSavePath = fileSavePath.replace(mobileId,UNKNOWN_MOBILE_PIC);
+        }
         String filepath = fileRootPath + fileSavePath;
         try {
             FileInputStream fileInputStream = (FileInputStream) multipartFile.getInputStream();
@@ -71,11 +77,29 @@ public class OvenMobileRelationService {
         } catch (IOException e) {
             return ServerResponse.createByError(ReturnInfo.EMPTY_PIC_ERROR.getMsg());
         }
-        String mobileId = ovenMobileRelation.getMobileId();
-        MobileDetailInfo mobileDetailInfo = mobileDetailInfoRepository.findMobileDetailInfoByMobileId(mobileId);
+
         String url = GET_PICTURE_ROOT_URL + fileSavePath.replace(".jpg","");
-        JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,mobileId,5,url);
-        return jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),mobileDetailInfo.getTagId());
+        // 需要推送到手机
+        ImageInfoEntity imageInfoEntity = new ImageInfoEntity();
+        imageInfoEntity.setCreateTime(System.currentTimeMillis());
+        imageInfoEntity.setHasSendToMobile(isNeedSend);
+        imageInfoEntity.setTaskId(taskId);
+        imageInfoEntity.setOvenId(ovenId);
+        imageInfoEntity.setImageUrl(url);
+        if (isNeedSend == 1){
+            MobileDetailInfo mobileDetailInfo = mobileDetailInfoRepository.findMobileDetailInfoByMobileId(mobileId);
+            JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,mobileId,5,url);
+            ServerResponse serverResponse = jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),mobileDetailInfo.getTagId());
+            imageInfoEntity.setMobileId(mobileId);
+            imageInfoEntity.setSendResult(serverResponse.getErrorMessage());
+            imageInfoRepository.save(imageInfoEntity);
+            return serverResponse;
+        } else {
+            imageInfoEntity.setMobileId("unknown");
+            imageInfoEntity.setSendResult("不需要推送");
+            imageInfoRepository.save(imageInfoEntity);
+            return ServerResponse.createBySuccess();
+        }
     }
 
     /**

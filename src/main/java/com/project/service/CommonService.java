@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -246,10 +245,6 @@ public class CommonService {
         imageEntity.setImages(imageMsgList);
         return imageEntity;
     }
-
-//    public static void main(String[] args){
-//        new CommonService().getAllImageService("20190808","20190809","first_oven","15900959412");
-//    }
 
     @Data
     @NoArgsConstructor

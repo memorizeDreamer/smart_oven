@@ -101,9 +101,6 @@ public class MobileAppService {
                 ovenDetailInfoRepository.updateOvenStatus(status,ovenId);
             }
         } else {
-            if (status != 0){
-                return ServerResponse.createByErrorMessage("烤箱只能发送关闭状态");
-            }
             ovenDetailInfoRepository.updateOvenStatus(status,ovenId);
         }
         //存下发送记录

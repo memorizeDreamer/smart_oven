@@ -30,13 +30,14 @@ public class OvenController {
     @PostMapping("/oven/process/upload_picture.do")
     public ServerResponse collectPicture(@RequestHeader("oven_id") String ovenId,
                                          @RequestHeader("task_id") String taskId,
+                                         @RequestHeader("is_need_send")int isNeedSend,
                                          @RequestHeader("token") String token,
                                          @RequestBody MultipartFile file){
         String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"upload_picture.do");
         if (!AuthToken.checkToken(sourceToken,token)){
             return ServerResponse.createByErrorMessage("鉴权失败");
         }
-        return ovenMobileRelationService.collectPicture(ovenId,file,taskId);
+        return ovenMobileRelationService.collectPicture(ovenId,file,taskId, isNeedSend);
     }
 
     @PostMapping("/oven/process/transform_data.do")
