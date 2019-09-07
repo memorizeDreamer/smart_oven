@@ -65,9 +65,10 @@ public class OvenMobileRelationService {
         if (ovenMobileRelation == null && isNeedSend == 1){
             return ServerResponse.createByError(ReturnInfo.UNKNOWN_DEVICE.getMsg());
         }
-        String mobileId = ovenMobileRelation == null ?UNKNOWN_MOBILE_PIC : ovenMobileRelation.getMobileId();
+        String mobileId = ovenMobileRelation == null ? UNKNOWN_MOBILE_PIC : ovenMobileRelation.getMobileId();
         String fileSavePath = FileUtil.getFilePath(ovenMobileRelation,taskId); // 用于推送给手机APP
         if (isNeedSend == 0){
+            log.info("{}不需要推送到手机,设置图片存贮路径为unknown",ovenId);
             fileSavePath = fileSavePath.replace(mobileId,UNKNOWN_MOBILE_PIC);
         }
         String filepath = fileRootPath + fileSavePath;
@@ -77,7 +78,7 @@ public class OvenMobileRelationService {
         } catch (IOException e) {
             return ServerResponse.createByError(ReturnInfo.EMPTY_PIC_ERROR.getMsg());
         }
-
+        ovenDetailInfoRepository.updateOvenNeedSendStatus(isNeedSend,ovenId);
         String url = GET_PICTURE_ROOT_URL + fileSavePath.replace(".jpg","");
         // 需要推送到手机
         ImageInfoEntity imageInfoEntity = new ImageInfoEntity();
@@ -93,6 +94,7 @@ public class OvenMobileRelationService {
             imageInfoEntity.setMobileId(mobileId);
             imageInfoEntity.setSendResult(serverResponse.getErrorMessage());
             imageInfoRepository.save(imageInfoEntity);
+            log.info("{}需要推送到手机,推送结果为{}",ovenId,serverResponse.getErrorMessage());
             return serverResponse;
         } else {
             imageInfoEntity.setMobileId("unknown");
@@ -149,6 +151,20 @@ public class OvenMobileRelationService {
                 ovenStatusRepository.updateIsSend(0,ovenId);
             }
         }
+    }
+
+    /**
+     * 更新是否烤箱是否需要发送图片
+     * @param ovenId
+     * @param needSendPic
+     * @return
+     */
+    public ServerResponse updateNeedSendPic(String ovenId, int needSendPic){
+        int result = ovenDetailInfoRepository.updateOvenNeedSendStatus(needSendPic,ovenId);
+        if (result != 1){
+            return ServerResponse.createByError();
+        }
+        return ServerResponse.createBySuccess();
     }
 
     /**

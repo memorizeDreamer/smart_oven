@@ -61,6 +61,17 @@ public class OvenController {
         return ServerResponse.createBySuccess();
     }
 
+    @PostMapping("/oven/process/update_need_send_pic.do")
+    public ServerResponse updateSendPic(@RequestHeader String ovenId,
+                                        @RequestHeader("token") String token,
+                                        @RequestHeader("need_send_pic") int needSendPic){
+        String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"update_need_send_pic.do");
+        if (!AuthToken.checkToken(sourceToken,token)){
+            return ServerResponse.createByErrorMessage("鉴权失败");
+        }
+        return ovenMobileRelationService.updateNeedSendPic(ovenId,needSendPic);
+    }
+
     /**
      * 每分钟执行一次扫描
      */

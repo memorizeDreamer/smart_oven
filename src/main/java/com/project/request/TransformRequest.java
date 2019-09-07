@@ -37,6 +37,6 @@ public class TransformRequest {
     private int time;//加热时间
 
     @JsonProperty(value = "need_send_pic")
-    private int needSendPic; // 是否需要推送任务截图给手机
+    private int needSendPic = 0; // 是否需要推送任务截图给手机
 
 }
