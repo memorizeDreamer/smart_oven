@@ -50,4 +50,7 @@ public class BindRelationRequest {
 
     @JsonProperty(value = "address")
     private String address; // 地址
+
+    @JsonProperty(value = "need_send_pic")
+    private int needSendPic; // 是否需要推送任务截图给手机
 }

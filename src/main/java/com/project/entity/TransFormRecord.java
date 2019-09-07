@@ -45,4 +45,10 @@ public class TransFormRecord {
 
     @Column(name = "create_time")
     private Long createTime;
+
+    @Column(name = "weight")
+    private int weight; //解冻重量
+
+    @Column(name = "need_send_pic")
+    private int needSendPic; // 是否需要推送任务截图给手机
 }

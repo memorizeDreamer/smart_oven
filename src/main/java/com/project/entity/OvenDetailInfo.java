@@ -19,6 +19,9 @@ public class OvenDetailInfo {
     @Column(name = "oven_id")
     private String ovenId;
 
+    @Column(name = "need_send_pic")
+    private int needSendPic;
+
     @Column(name = "tag_id")
     private String tagId;
 

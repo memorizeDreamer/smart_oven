@@ -21,6 +21,6 @@ public interface OvenDetailInfoRepository extends CrudRepository<OvenDetailInfo,
     // 更新烤箱状态
     @Transactional
     @Modifying
-    @Query("update oven_detail_info set oven_status = ?1 where oven_id = ?2")
-    int updateOvenStatus(int status, String ovenId);
+    @Query("update oven_detail_info set oven_status = ?1,need_send_pic = ?2 where oven_id = ?3")
+    int updateOvenStatus(int status, int needSendPic, String ovenId);
 }

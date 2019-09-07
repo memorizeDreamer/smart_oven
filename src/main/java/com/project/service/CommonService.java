@@ -101,6 +101,7 @@ public class CommonService {
         ovenDetailInfo.setOvenModel(ovenModel);
         ovenDetailInfo.setOvenBrand(ovenBrand);
         ovenDetailInfo.setBirth(birthday);
+        ovenDetailInfo.setNeedSendPic(bindRelationRequest.getNeedSendPic());
         ovenDetailInfo.setCreateTime(System.currentTimeMillis());
         ovenDetailInfo.setUpdateTime(System.currentTimeMillis());
         ovenDetailInfoRepository.save(ovenDetailInfo);

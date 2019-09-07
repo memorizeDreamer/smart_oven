@@ -5,11 +5,13 @@ import cn.jiguang.common.resp.APIConnectionException;
 import cn.jiguang.common.resp.APIRequestException;
 import cn.jpush.api.JPushClient;
 import cn.jpush.api.push.PushResult;
+import cn.jpush.api.push.model.Message;
 import cn.jpush.api.push.model.Options;
 import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
 import cn.jpush.api.push.model.audience.Audience;
 import cn.jpush.api.push.model.notification.Notification;
+import cn.jpush.api.push.model.notification.PlatformNotification;
 import com.project.response.ServerResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,14 +22,10 @@ import org.springframework.stereotype.Component;
 public class JPushMessage {
 
     @Value("${jiguang.master_secret}")
-    private String masterSecret = "fd9785be7e05b9dc14569f63";
+    private String masterSecret;
 
     @Value("${jiguang.app_key}")
-    private String appKey = "3b1b3049c6ec58542a7f8a5b";
-
-    public static void main(String[] args){
-        new JPushMessage().jPushMessage("test","666666");
-    }
+    private String appKey;
 
     public ServerResponse jPushMessage(String message, String tagId){
         ClientConfig clientConfig = ClientConfig.getInstance();
@@ -58,7 +56,9 @@ public class JPushMessage {
         return PushPayload.newBuilder()
                 .setPlatform(Platform.all())
                 .setAudience(Audience.tag(tagId))
-                .setNotification(Notification.alert(alert))
+                .setMessage(Message.newBuilder()
+                        .setMsgContent(alert)
+                        .build())
                 .setOptions(Options.newBuilder().setApnsProduction(false).setTimeToLive(86000).build())
                 .build();
     }

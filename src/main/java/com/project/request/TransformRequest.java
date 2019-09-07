@@ -30,7 +30,13 @@ public class TransformRequest {
     @JsonProperty(value = "Downtempture")
     private int downtempture;//下管温度
 
+    @JsonProperty(value = "Weight")
+    private int weight; //解冻重量
+
     @JsonProperty(value = "Time")
     private int time;//加热时间
+
+    @JsonProperty(value = "need_send_pic")
+    private int needSendPic; // 是否需要推送任务截图给手机
 
 }
