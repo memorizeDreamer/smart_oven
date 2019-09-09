@@ -15,7 +15,7 @@ public class TransformRequest {
     @JsonProperty(value = "Mobile_ID")
     private String mobileId;// 手机id ，如果是手机向烤箱发送，可以不传
 
-    @JsonProperty(value = "TO")
+    @JsonProperty(value = "To")
     private int to;//传输方向：0 烤箱app向服务器传送 1 手机app向服务器传送
 
     @JsonProperty(value = "Status")

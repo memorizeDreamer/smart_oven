@@ -133,7 +133,7 @@ public class CommonService {
         ovenStatusRepository.save(ovenStatus);
 
         // 绑定成功后，需要把消息推送给烤箱
-        JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,mobileId,1,"绑定成功");
+        JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,mobileId,2,"绑定成功");
         jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),ovenTagId);
         return ServerResponse.createBySuccessMessage("绑定成功");
     }
