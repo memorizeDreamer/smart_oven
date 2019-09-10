@@ -317,8 +317,12 @@ public class MobileUserService {
             return ServerResponse.createByErrorMessage("密码长度不在6-16");
         }
         String md5Password  = MD5Util.MD5Encode(passwordNew,"UTF-8");
-        mobileUserRepository.updatePassword(System.currentTimeMillis(),md5Password,username);
-        return ServerResponse.createBySuccessMessage("修改密码成功");
+        int result = mobileUserRepository.updatePassword(System.currentTimeMillis(),md5Password,username);
+        if (result == 1) {
+            return ServerResponse.createBySuccessMessage("修改密码成功");
+        } else {
+            return ServerResponse.createByErrorMessage("修改密码失败，用户名不存在");
+        }
     }
 
     public ServerResponse<String> resetPassword(String passwordNew,MobileUser mobileUser,String codeString){
