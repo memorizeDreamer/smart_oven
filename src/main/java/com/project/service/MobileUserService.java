@@ -341,6 +341,10 @@ public class MobileUserService {
     public ServerResponse uploadUserImage(String username,MultipartFile file){
         String filepath = fileRootPath + username + "/head/head_image.jpg";
         try {
+            File imageFile = new File(filepath);
+            if (imageFile.exists()){
+                imageFile.delete();
+            }
             FileInputStream fileInputStream = (FileInputStream) file.getInputStream();
             FileUtil.writeFile(filepath,fileInputStream);
         } catch (IOException e) {

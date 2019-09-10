@@ -10,6 +10,7 @@ import com.project.response.ServerResponse;
 import com.project.util.FileUtil;
 import com.project.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -122,6 +123,22 @@ public class OvenMobileRelationService {
         }
         JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,mobileId,7,JsonUtils.getStrFromObject(transformRequest));
         return jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),mobileDetailInfo.getTagId());
+    }
+
+    /**
+     * 获取烤箱状态
+     * @param ovenId
+     * @return
+     */
+    public ServerResponse getOvenStatus(String ovenId){
+        if (StringUtils.isBlank(ovenId)){
+            return ServerResponse.createByErrorMessage("请传入烤箱ID");
+        }
+        OvenMobileRelation ovenMobileRelation = ovenMobileRelationRepository.findOvenMobileRelationByOvenId(ovenId);
+        if (ovenMobileRelation == null){
+            return ServerResponse.createBySuccess(new OvenMobileRelation());
+        }
+        return ServerResponse.createBySuccess(ovenMobileRelation);
     }
 
     /**

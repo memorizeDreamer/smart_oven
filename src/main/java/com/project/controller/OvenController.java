@@ -9,10 +9,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @EnableScheduling
@@ -59,6 +56,15 @@ public class OvenController {
         }
         ovenMobileRelationService.checkOnline(ovenId);
         return ServerResponse.createBySuccess();
+    }
+
+    @GetMapping("/oven/process/get_oven_status.do")
+    public ServerResponse getOvenStatus(@RequestHeader String ovenId,@RequestHeader("token") String token){
+        String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"get_oven_status.do");
+        if (!AuthToken.checkToken(sourceToken,token)){
+            return ServerResponse.createByErrorMessage("鉴权失败");
+        }
+        return ovenMobileRelationService.getOvenStatus(ovenId);
     }
 
     @PostMapping("/oven/process/update_need_send_pic.do")
