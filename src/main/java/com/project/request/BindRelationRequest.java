@@ -5,22 +5,29 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class BindRelationRequest {
+    @NotNull
     @JsonProperty(value = "oven_id")
     private String ovenId; // 烤箱id
 
+    @NotNull
     @JsonProperty(value = "mobile_id")
     private String mobileId; // 手机id
 
+    @NotNull
     @JsonProperty(value = "oven_tag_id")
     private String ovenTagId; // 烤箱的tag
 
+    @NotNull
     @JsonProperty(value = "mobile_tag_id")
     private String mobileTagId; // 手机的tag
 
+    @NotNull
     @JsonProperty(value = "oven_name")
     private String ovenName; // 烤箱名字
 

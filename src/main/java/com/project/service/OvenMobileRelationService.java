@@ -188,7 +188,8 @@ public class OvenMobileRelationService {
                 String ovenName = ovenDetailInfo.getOvenName();
                 log.info("{}设备处于离线状态",ovenName);
                 // 为1表示当前记录已经发送不需要再次发送，但是需要
-                offLineOvenSet.add(ovenStatus.getOvenId());
+                boolean result = offLineOvenSet.add(ovenStatus.getOvenId());
+                log.info("{}添加至离线列表，添加结果{}",ovenStatus.getOvenId(),result);
                 if (ovenStatus.getIsSend() == 1){
                     log.info("{}已发送过状态，不需要再发送",ovenName);
                     continue;

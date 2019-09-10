@@ -76,6 +76,10 @@ public class CommonService {
         String nickname = bindRelationRequest.getNickname();
         String avata = bindRelationRequest.getAvata();
 
+        if (StringUtils.isBlank(ovenId) || StringUtils.isBlank(mobileId)){
+            return ServerResponse.createByErrorMessage("烤箱ID或者手机ID为空");
+        }
+
         //查看改手机已经绑定的数量
         List<OvenMobileRelation> ovenMobileRelationList = ovenMobileRelationRepository.findOvenMobileRelationByMobileIdOrderByUpdateDateDesc(mobileId);
         log.info("找到{}已经绑定的数量{}",mobileId,ovenMobileRelationList.size());
@@ -126,7 +130,12 @@ public class CommonService {
         ovenMobileRelationRepository.save(ovenMobileRelation);
 
         // 生成一条在线状态的记录，用于扫描在线状态
-        OvenStatus ovenStatus = new OvenStatus();
+        OvenStatus ovenStatus = ovenStatusRepository.findOvenStatusByOvenId(ovenId);
+        if (ovenStatus != null){
+            log.info("已存在发送记录信息{},需要先删除",ovenId);
+            ovenStatusRepository.delete(ovenStatus);
+        }
+        ovenStatus = new OvenStatus();
         ovenStatus.setUpdateTime(System.currentTimeMillis());
         ovenStatus.setOvenId(ovenId);
         ovenStatus.setIsSend(0);
@@ -141,7 +150,9 @@ public class CommonService {
     public ServerResponse removeBindRelationService(RemoveBindRequest removeBindRequest){
         String mobileId = removeBindRequest.getMobileId();
         String ovenId = removeBindRequest.getOvenId();
-
+        if (StringUtils.isBlank(ovenId)){
+            return ServerResponse.createByErrorMessage("烤箱ID为空");
+        }
         OvenDetailInfo ovenDetailInfo = ovenDetailInfoRepository.findOvenDetailInfoByOvenId(ovenId);
         String ovenName = null;
         if (ovenDetailInfo == null){
