@@ -94,8 +94,9 @@ public class MobileAppService {
         // 如果是手机向烤箱发送启动指令，则会判断烤箱是否正在运行
         int status = transformRequest.getStatus();
         if (transformRequest.getTo() == 1){
-            if (transformRequest.getStatus() == 1){
-                if (ovenDetailInfo.getOvenStatus() == 1){
+            // 烤箱正在预热或者加热状态下，都不允许再次发送预热或者加热命令
+            if (status == 1 || status == 2){
+                if (ovenDetailInfo.getOvenStatus() == 1 || ovenDetailInfo.getOvenStatus() == 2){
                     return ServerResponse.createByReturnInfo(ReturnInfo.DEVICE_ISRUNNING);
                 }
             }
