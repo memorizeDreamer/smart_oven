@@ -161,7 +161,8 @@ public class MobileUserService {
                 //限定手机号为全数据，且为11位
                 if (org.apache.commons.lang3.StringUtils.isBlank(str)) {
                     return ServerResponse.createByErrorMessage("手机号不能为空");
-                }else if(str.length()!=11 && !isNumeric(str)) {
+                }
+                if(str.length()!=11 && !isNumeric(str)) {
                     return ServerResponse.createByErrorMessage("手机号格式错误");
                 }
                 MobileUser mobileUser = null;
@@ -178,7 +179,11 @@ public class MobileUserService {
             if ("username".equals(type)){
                 if (org.apache.commons.lang3.StringUtils.isBlank(str)) {
                     return ServerResponse.createByErrorMessage("用户名不能为空");
-                }else if(str.length() < 6 || str.length() > 11) {
+                }
+                if (!checkoutIfIsNumOrChar(str)){
+                    return ServerResponse.createByErrorMessage("用户名必须是数字或者字母");
+                }
+                if(str.length() < 6 || str.length() > 11) {
                     return ServerResponse.createByErrorMessage("用户名格式错误");
                 }
                 MobileUser mobileUser = null;
@@ -211,6 +216,23 @@ public class MobileUserService {
             return ServerResponse.createByErrorMessage("参数错误");
         }
         return ServerResponse.createBySuccessMessage("校验成功");
+    }
+
+    /**
+     * 检测用户名是否为数字或者字母
+     * @param text
+     * @return
+     */
+    private static Boolean checkoutIfIsNumOrChar(String text){
+        for (int i = 0;i<text.length();i++){
+            char c = text.charAt(i);
+            if (Character.isLowerCase(c) || Character.isUpperCase(c) || Character.isDigit(c)){
+                continue;
+            } else {
+                return false;
+            }
+        }
+        return true;
     }
 
     /*
