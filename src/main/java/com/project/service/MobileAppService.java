@@ -76,7 +76,7 @@ public class MobileAppService {
         String ovenId = transformRequest.getId();
         String mobileId = transformRequest.getMobileId();
         if (StringUtils.isBlank(ovenId) || StringUtils.isBlank(mobileId)){
-            return ServerResponse.createByErrorMessage("请传图烤箱ID和手机ID");
+            return ServerResponse.createByErrorMessage("请传入烤箱ID和手机ID");
         }
         OvenMobileRelation ovenMobileRelation = ovenMobileRelationRepository.findOvenMobileRelationByOvenId(ovenId);
         if (ovenMobileRelation == null){
@@ -104,7 +104,7 @@ public class MobileAppService {
             JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,null,6,JsonUtils.getStrFromObject(transformRequest));
             ServerResponse serverResponse = jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),ovenDetailInfo.getTagId());
             if (serverResponse.isSuccess()){
-                ovenDetailInfoRepository.updateOvenStatus(status,transformRequest.getNeedSendPic(),ovenId);
+                ovenDetailInfoRepository.updateOvenNeedSendStatus(transformRequest.getNeedSendPic(),ovenId);
             } else {
                 return serverResponse;
             }
