@@ -59,7 +59,7 @@ public class JPushMessage {
                 .setMessage(Message.newBuilder()
                         .setMsgContent(alert)
                         .build())
-                .setOptions(Options.newBuilder().setApnsProduction(false).setTimeToLive(86000).build())
+                .setOptions(Options.newBuilder().setApnsProduction(false).setTimeToLive(1).build())
                 .build();
     }
 }
