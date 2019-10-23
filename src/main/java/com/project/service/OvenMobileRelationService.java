@@ -218,7 +218,7 @@ public class OvenMobileRelationService {
                 JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenDetailInfo.getOvenId(),mobileDetailInfo.getMobileId(),4,ovenDetailInfo.getOvenName()+"设备已断开连接");
                 ServerResponse serverResponse = jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),mobileDetailInfo.getTagId());
                 if (!serverResponse.isSuccess()){
-                    //推送成功后，更新send状态为1
+                    //推送失败后，更新send状态为2
                     ovenStatusRepository.updateIsSend(2,ovenStatus.getOvenId());
                     // 并更新设备状态为离线
                     ovenDetailInfoRepository.updateOvenOffLine(1,ovenStatus.getOvenId());
@@ -228,6 +228,8 @@ public class OvenMobileRelationService {
                     ovenStatusRepository.updateIsSend(1,ovenStatus.getOvenId());
                     // 并更新设备状态为离线
                     ovenDetailInfoRepository.updateOvenOffLine(1,ovenStatus.getOvenId());
+                    // 设备离线之后，置为闲置状态
+                    ovenDetailInfoRepository.onlyUpdateOvenStatus(0,ovenStatus.getOvenId());
                 }
             }
         } else {
