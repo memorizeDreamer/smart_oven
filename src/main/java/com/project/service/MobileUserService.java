@@ -181,7 +181,7 @@ public class MobileUserService {
                     return ServerResponse.createByErrorMessage("用户名不能为空");
                 }
                 if (!checkoutIfIsNumOrChar(str)){
-                    return ServerResponse.createByErrorMessage("用户名必须是数字或者字母");
+                    return ServerResponse.createByErrorMessage("用户名必须是数字和字母");
                 }
                 if(str.length() < 6 || str.length() > 11) {
                     return ServerResponse.createByErrorMessage("用户名格式错误");
@@ -218,21 +218,18 @@ public class MobileUserService {
         return ServerResponse.createBySuccessMessage("校验成功");
     }
 
+    public static void main(String[] args){
+        System.out.println(checkoutIfIsNumOrChar("21312aa"));
+    }
+
     /**
-     * 检测用户名是否为数字或者字母
+     * 检测用户名是否为数字和字母组合
      * @param text
      * @return
      */
     private static Boolean checkoutIfIsNumOrChar(String text){
-        for (int i = 0;i<text.length();i++){
-            char c = text.charAt(i);
-            if (Character.isLowerCase(c) || Character.isUpperCase(c) || Character.isDigit(c)){
-                continue;
-            } else {
-                return false;
-            }
-        }
-        return true;
+        String regex = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,11}$";
+        return text.matches(regex);
     }
 
     /*
