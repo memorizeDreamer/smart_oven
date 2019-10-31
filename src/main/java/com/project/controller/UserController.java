@@ -42,7 +42,8 @@ public class UserController {
         }
         String username = mobileUser.getUsername();
         String password = mobileUser.getPassword();
-        ServerResponse serverResponse = mobileUserService.login(username,password);
+        String mobileNum = mobileUser.getMobile();
+        ServerResponse serverResponse = mobileUserService.login(username,password,mobileNum);
         if(serverResponse.isSuccess()){
             session.setAttribute(CURRENT_USER,serverResponse.getData());
             session.setMaxInactiveInterval(-1);

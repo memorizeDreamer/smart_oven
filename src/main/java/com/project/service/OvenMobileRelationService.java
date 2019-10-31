@@ -58,7 +58,7 @@ public class OvenMobileRelationService {
      * @param multipartFile
      * @return
      */
-    public ServerResponse collectPicture(String ovenId, MultipartFile multipartFile, String taskId, int isNeedSend){
+    public ServerResponse collectPicture(String ovenId, MultipartFile multipartFile, String taskId, int isNeedSend, String time, String temperature){
         if (multipartFile == null){
             return ServerResponse.createByError(ReturnInfo.EMPTY_PIC_ERROR.getMsg());
         }
@@ -69,7 +69,7 @@ public class OvenMobileRelationService {
         String mobileId = ovenMobileRelation == null ? UNKNOWN_MOBILE_PIC : ovenMobileRelation.getMobileId();
         String fileSavePath = FileUtil.getFilePath(ovenMobileRelation,taskId); // 用于推送给手机APP
         if (isNeedSend == 0){
-            log.info("{}不需要推送到手机,设置图片存贮路径为unknown",ovenId);
+            log.info("{}不需要延时摄影的,设置图片存贮路径为unknown",ovenId);
             fileSavePath = fileSavePath.replace(mobileId,UNKNOWN_MOBILE_PIC);
         }
         String filepath = fileRootPath + fileSavePath;
@@ -81,7 +81,7 @@ public class OvenMobileRelationService {
         }
         ovenDetailInfoRepository.updateOvenNeedSendStatus(isNeedSend,ovenId);
         String url = GET_PICTURE_ROOT_URL + fileSavePath.replace(".jpg","");
-        // 需要推送到手机
+        // 需要延时摄影的
         ImageInfoEntity imageInfoEntity = new ImageInfoEntity();
         imageInfoEntity.setCreateTime(System.currentTimeMillis());
         imageInfoEntity.setHasSendToMobile(isNeedSend);
@@ -90,18 +90,22 @@ public class OvenMobileRelationService {
         imageInfoEntity.setImageUrl(url);
         if (isNeedSend == 1){
             MobileDetailInfo mobileDetailInfo = mobileDetailInfoRepository.findMobileDetailInfoByMobileId(mobileId);
-            JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,mobileId,5,url);
+            JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,mobileId,5,url,time,temperature);
             ServerResponse serverResponse = jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),mobileDetailInfo.getTagId());
             imageInfoEntity.setMobileId(mobileId);
             imageInfoEntity.setSendResult(serverResponse.getErrorMessage());
             imageInfoRepository.save(imageInfoEntity);
-            log.info("{}需要推送到手机,推送结果为{}",ovenId,serverResponse.getErrorMessage());
+            log.info("{}需要延时摄影的图片,推送结果为{}",ovenId,serverResponse.getErrorMessage());
             return serverResponse;
         } else {
+            MobileDetailInfo mobileDetailInfo = mobileDetailInfoRepository.findMobileDetailInfoByMobileId(mobileId);
+            JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenId,mobileId,5,url,time,temperature);
+            ServerResponse serverResponse = jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity),mobileDetailInfo.getTagId());
             imageInfoEntity.setMobileId("unknown");
             imageInfoEntity.setSendResult("不需要推送");
             imageInfoRepository.save(imageInfoEntity);
-            return ServerResponse.createBySuccess();
+            log.info("{}不需要延时摄影的图片,推送结果为{}",ovenId,serverResponse.getErrorMessage());
+            return serverResponse;
         }
     }
 

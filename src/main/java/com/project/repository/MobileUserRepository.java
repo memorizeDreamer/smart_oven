@@ -10,6 +10,8 @@ import javax.transaction.Transactional;
 public interface MobileUserRepository extends CrudRepository<MobileUser,Integer> {
     MobileUser findMobileUserByUsernameAndPassword(String username,String password);
 
+    MobileUser findMobileUserByMobileAndPassword(String mobileNum, String password);
+
     MobileUser findMobileUserByUsername(String username);
 
     MobileUser findMobileUserByMobile(String mobileNum);

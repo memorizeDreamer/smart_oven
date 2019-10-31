@@ -51,17 +51,32 @@ public class MobileUserService {
     @Value("${config.key.max_code_num}")
     private String maxCodeNumKey;
 
-    public ServerResponse login(String username, String password) {
-        ServerResponse validResponse = this.checkValid(username,password);
-        if (!validResponse.isSuccess()) {
-            return validResponse;
+    public ServerResponse login(String username, String password, String mobileNum) {
+        // 用户名密码登录
+        if (StringUtils.isBlank(mobileNum)){
+            ServerResponse validResponse = this.checkValid(username,password);
+            if (!validResponse.isSuccess()) {
+                return validResponse;
+            }
+            String md5Password = MD5Util.MD5Encode(password,"UTF-8");
+            MobileUser mobileUser  = mobileUserRepository.findMobileUserByUsernameAndPassword(username,md5Password);
+            //更新登陆时间
+            mobileUserRepository.updateTime(System.currentTimeMillis(),username);
+            mobileUser.setPassword(org.apache.commons.lang3.StringUtils.EMPTY);
+            return ServerResponse.createBySuccess("登录成功",mobileUser);
+        } else {
+            // 手机号登录
+            ServerResponse validResponse = this.checkMobileValid(mobileNum,password);
+            if (!validResponse.isSuccess()) {
+                return validResponse;
+            }
+            String md5Password = MD5Util.MD5Encode(password,"UTF-8");
+            MobileUser mobileUser  = mobileUserRepository.findMobileUserByMobileAndPassword(mobileNum,md5Password);
+            //更新登陆时间
+            mobileUserRepository.updateTime(System.currentTimeMillis(),username);
+            mobileUser.setPassword(org.apache.commons.lang3.StringUtils.EMPTY);
+            return ServerResponse.createBySuccess("登录成功",mobileUser);
         }
-        String md5Password = MD5Util.MD5Encode(password,"UTF-8");
-        MobileUser mobileUser  = mobileUserRepository.findMobileUserByUsernameAndPassword(username,md5Password);
-        //更新登陆时间
-        mobileUserRepository.updateTime(System.currentTimeMillis(),username);
-        mobileUser.setPassword(org.apache.commons.lang3.StringUtils.EMPTY);
-        return ServerResponse.createBySuccess("登录成功",mobileUser);
     }
 
     /*
@@ -116,6 +131,43 @@ public class MobileUserService {
         sessionUser.setPassword(StringUtils.EMPTY);
         session.setAttribute(Const.CURRENT_USER, sessionUser);
         return ServerResponse.createBySuccessMessage("更新成功");
+    }
+
+
+    /**
+     * 校验用户名和密码
+     * @param mobileNum
+     * @param password
+     * @return
+     */
+    public ServerResponse<String> checkMobileValid(String mobileNum, String password) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(mobileNum)) {
+            return ServerResponse.createByErrorMessage("手机号不能为空");
+        }
+        log.info(mobileNum+":current user attemp to login!");
+        MobileUser mobileUser = null;
+        try {
+            mobileUser = mobileUserRepository.findMobileUserByMobile(mobileNum);
+        } catch (EmptyResultDataAccessException e) {
+            log.error("can not find user: "+mobileNum);
+        }
+        if (mobileUser == null) {
+            return ServerResponse.createByErrorMessage("该用户不存在");
+        }
+        if (StringUtils.isBlank(password)) {
+            return ServerResponse.createByErrorMessage("密码不能为空");
+        }
+        String md5Password = MD5Util.MD5Encode(password,"UTF-8");
+        try {
+            mobileUser  = mobileUserRepository.findMobileUserByMobileAndPassword(mobileNum,md5Password);
+        } catch (EmptyResultDataAccessException e) {
+            log.error("can not find user: "+mobileNum);
+            mobileUser = null;
+        }
+        if (mobileUser==null) {
+            return ServerResponse.createByErrorMessage("账号或密码错误");
+        }
+        return ServerResponse.createBySuccessMessage("校验成功");
     }
 
     /**
