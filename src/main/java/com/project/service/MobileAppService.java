@@ -73,6 +73,7 @@ public class MobileAppService {
      * @return
      */
     public ServerResponse transformData(TransformRequest transformRequest){
+        log.info(JsonUtils.getStrFromObject(transformRequest));
         String ovenId = transformRequest.getId();
         String mobileId = transformRequest.getMobileId();
         if (StringUtils.isBlank(ovenId) || StringUtils.isBlank(mobileId)){
@@ -114,6 +115,7 @@ public class MobileAppService {
             ServerResponse serverResponse = jPushMessage.jPushMessage(JsonUtils.getStrFromObject(jPushMessageEntity), mobileDetailInfo.getTagId());
             if (serverResponse.isSuccess()){
                 ovenDetailInfoRepository.updateOvenStatus(status,transformRequest.getNeedSendPic(),ovenId);
+                log.info("更新烤箱状态{}",status == 0 ? "闲置" : "工作");
             } else {
                 return serverResponse;
             }

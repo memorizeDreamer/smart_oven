@@ -1,5 +1,6 @@
 server:
   port: 8090
+  connection-timeout: 180000
 
 spring:
   datasource:
@@ -22,7 +23,6 @@ spring:
       enabled: true
       force: true
 
-
 file:
   picture:
     path: /Users/liufeng/Pictures/
@@ -40,3 +40,6 @@ config:
     max_device_num: max_device_num
     # 1个小时内最多验证码数量
     max_code_num: max_code_num
+
+logging:
+  config: logback.xml
