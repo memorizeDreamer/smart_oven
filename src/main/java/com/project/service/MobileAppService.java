@@ -166,7 +166,7 @@ public class MobileAppService {
             return ServerResponse.createByErrorMessage("该烤箱没有任务图片");
         }
         String imageUrl = imageInfoEntity.getImageUrl();
-        Boolean isNeedSendPic = imageUrl.contains(OvenMobileRelationService.UNKNOWN_MOBILE_PIC);
+        Boolean isNeedSendPic = !imageUrl.contains(OvenMobileRelationService.UNKNOWN_MOBILE_PIC);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("oven_status",status);
         jsonObject.put("is_need_send_pic",isNeedSendPic);
