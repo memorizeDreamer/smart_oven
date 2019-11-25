@@ -56,7 +56,7 @@ public class MobileController {
     @GetMapping("/mobile/process/get_oven_status.do")
     public ServerResponse getOvenStatus(@RequestHeader("oven_id") String ovenId,
                                                        @RequestHeader("token") String token){
-        String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"get_ovens_status.do");
+        String sourceToken = AuthToken.getAuthToken(MODULE_NAME,CONTROLLER_NAME,"get_oven_status.do");
         if (!AuthToken.checkToken(sourceToken,token)){
             return ServerResponse.createByErrorMessage("鉴权失败");
         }
