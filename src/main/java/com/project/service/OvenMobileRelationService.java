@@ -50,7 +50,7 @@ public class OvenMobileRelationService {
 
     public Set<String> offLineOvenSet = new HashSet<>();
 
-    private static final String UNKNOWN_MOBILE_PIC = "unknown";
+    public static final String UNKNOWN_MOBILE_PIC = "unknown";
 
     /**
      * 设备上传图片，并把回去图片的连接推送给手机APP

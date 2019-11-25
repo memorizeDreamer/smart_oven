@@ -1,16 +1,11 @@
 package com.project.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.project.common.JPushMessage;
-import com.project.entity.MobileDetailInfo;
-import com.project.entity.OvenDetailInfo;
-import com.project.entity.OvenMobileRelation;
-import com.project.entity.TransFormRecord;
+import com.project.entity.*;
 import com.project.message.JPushMessageEntity;
-import com.project.repository.MobileDetailInfoRepository;
-import com.project.repository.TransformRecordRepository;
+import com.project.repository.*;
 import com.project.request.TransformRequest;
-import com.project.repository.OvenDetailInfoRepository;
-import com.project.repository.OvenMobileRelationRepository;
 import com.project.response.ReturnInfo;
 import com.project.response.ServerResponse;
 import com.project.util.FileUtil;
@@ -43,6 +38,9 @@ public class MobileAppService {
 
     @Autowired
     private MobileDetailInfoRepository mobileDetailInfoRepository;
+
+    @Autowired
+    private ImageInfoRepository imageInfoRepository;
 
     @Autowired
     private JPushMessage jPushMessage;
@@ -149,5 +147,30 @@ public class MobileAppService {
             ovenDetailInfoList.add(ovenDetailInfo);
         }
         return ServerResponse.createBySuccess(ovenDetailInfoList);
+    }
+
+    /**
+     * 获取烤箱状态，最新一张图片的url，是否需要延时摄影
+     * @param ovenId
+     * @return
+     */
+    public ServerResponse getOvenStatus(String ovenId){
+        OvenDetailInfo ovenDetailInfo = ovenDetailInfoRepository.findOvenDetailInfoByOvenId(ovenId);
+        if (ovenDetailInfo == null){
+            return ServerResponse.createByErrorMessage("不存在该烤箱ID");
+        }
+        int status = ovenDetailInfo.getOvenStatus();
+
+        ImageInfoEntity imageInfoEntity = imageInfoRepository.findFirstByOvenIdOrderByCreateTimeDesc(ovenId);
+        if (imageInfoEntity == null){
+            return ServerResponse.createByErrorMessage("该烤箱没有任务图片");
+        }
+        String imageUrl = imageInfoEntity.getImageUrl();
+        Boolean isNeedSendPic = imageUrl.contains(OvenMobileRelationService.UNKNOWN_MOBILE_PIC);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("oven_status",status);
+        jsonObject.put("is_need_send_pic",isNeedSendPic);
+        jsonObject.put("image_url",imageUrl);
+        return ServerResponse.createBySuccess(jsonObject);
     }
 }
