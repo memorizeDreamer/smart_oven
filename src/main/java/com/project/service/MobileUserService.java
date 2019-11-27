@@ -232,11 +232,14 @@ public class MobileUserService {
                 if (org.apache.commons.lang3.StringUtils.isBlank(str)) {
                     return ServerResponse.createByErrorMessage("用户名不能为空");
                 }
+                if(str.length() < 6) {
+                    return ServerResponse.createByErrorMessage("用户名长度不能小于6");
+                }
+                if (str.length() > 11) {
+                    return ServerResponse.createByErrorMessage("用户名长度不能大于11");
+                }
                 if (!checkoutIfIsNumOrChar(str)){
                     return ServerResponse.createByErrorMessage("用户名必须是数字和字母");
-                }
-                if(str.length() < 6 || str.length() > 11) {
-                    return ServerResponse.createByErrorMessage("用户名格式错误");
                 }
                 MobileUser mobileUser = null;
                 try {
