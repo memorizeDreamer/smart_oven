@@ -372,16 +372,16 @@ public class MobileUserService {
      * @param forgetToken :token
      */
     public ServerResponse forgetResetPassword(MobileUser mobileUser, String passwordNew,String codeString){
-        ServerResponse serverResponse = checkSmsCodeString(mobileUser.getMobile(),codeString,Const.FORGETPASSWORD);
-        if (serverResponse.getErrorCode() != ReturnInfo.OPERATION_SUCCESS.getCode()){
+        String mobileNum = mobileUser.getMobile();
+        ServerResponse serverResponse = checkSmsCodeString(mobileNum,codeString,Const.FORGETPASSWORD);
+        if (!serverResponse.isSuccess()){
             return serverResponse;
         }
-        String username = mobileUser.getUsername();
         MobileUser existMobileUser = null;
         try {
-            existMobileUser = mobileUserRepository.findMobileUserByUsername(username);
+            existMobileUser = mobileUserRepository.findMobileUserByMobile(mobileNum);
         } catch (EmptyResultDataAccessException e) {
-            log.error("can not find codestring: "+username);
+            log.error("can not find codestring: "+mobileNum);
             existMobileUser = null;
         }
         if (existMobileUser == null) {
@@ -390,6 +390,7 @@ public class MobileUserService {
         if (passwordNew.length() > 16 || passwordNew.length() < 6){
             return ServerResponse.createByErrorMessage("密码长度不在6-16");
         }
+        String username = existMobileUser.getUsername();
         String md5Password  = MD5Util.MD5Encode(passwordNew,"UTF-8");
         int result = mobileUserRepository.updatePassword(System.currentTimeMillis(),md5Password,username);
         if (result == 1) {
