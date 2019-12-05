@@ -24,7 +24,7 @@ public class UserFeedService {
 
     private String userFeedPath = "/feed";
 
-    private final static String USER_FEED_IMAGE = "http://47.103.85.203:8090/mobile/user/get_user_feed_image.do?username=%s&imagename=%s";
+    private final static String USER_FEED_IMAGE = "http://47.103.98.105:8080/mobile/user/get_user_feed_image.do?username=%s&imagename=%s";
 
     @Value("${file.picture.path}")
     public String fileRootPath;

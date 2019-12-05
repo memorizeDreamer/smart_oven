@@ -25,7 +25,7 @@ import java.util.Set;
 @Slf4j
 @Service
 public class OvenMobileRelationService {
-    private final static String GET_PICTURE_ROOT_URL = "http://47.103.85.203:8090/mobile/process/getPicture/";
+    private final static String GET_PICTURE_ROOT_URL = "http://47.103.98.105:8080/mobile/process/getPicture/";
 
     @Value("${file.picture.path}")
     public String fileRootPath;

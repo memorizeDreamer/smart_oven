@@ -46,7 +46,7 @@ public class MobileUserService {
     @Autowired
     private ConfigureInfoRepository configureInfoRepository;
 
-    private final static String USER_HEAD_IMAGE = "http://47.103.85.203:8090/mobile/user/get_user_image.do?username=";
+    private final static String USER_HEAD_IMAGE = "http://47.103.98.105:8080/mobile/user/get_user_image.do?username=";
 
     @Value("${config.key.max_code_num}")
     private String maxCodeNumKey;
