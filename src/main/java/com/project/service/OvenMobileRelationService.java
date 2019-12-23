@@ -195,13 +195,13 @@ public class OvenMobileRelationService {
         Long currentTime = System.currentTimeMillis();
         // 查询出三分钟以前的是数据
         // 差值在180000ms内表示在线;
-        List<OvenStatus> ovenStatusList = ovenStatusRepository.findOvenStatusByUpdateTimeBefore(currentTime-1800000);
+        List<OvenStatus> ovenStatusList = ovenStatusRepository.findOvenStatusByUpdateTimeBefore(currentTime-30000);
         if (ovenStatusList != null || !ovenStatusList.isEmpty()){
             for (int i=0;i<ovenStatusList.size();i++){
                 OvenStatus ovenStatus = ovenStatusList.get(i);
                 OvenMobileRelation ovenMobileRelation = ovenMobileRelationRepository.findOvenMobileRelationByOvenId(ovenStatus.getOvenId());
                 if (ovenMobileRelation == null){
-                    log.info("{}未绑定，不需要检测",ovenStatus.getOvenId());
+                    log.debug("{}未绑定，不需要检测",ovenStatus.getOvenId());
                     continue;
                 }
                 MobileDetailInfo mobileDetailInfo = mobileDetailInfoRepository.findMobileDetailInfoByMobileId(ovenMobileRelation.getMobileId());

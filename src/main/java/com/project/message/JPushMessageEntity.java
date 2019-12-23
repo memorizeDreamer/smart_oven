@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@SuppressWarnings({"unchecked","fallthrough"})
 @JsonSerialize(include =  JsonSerialize.Inclusion.NON_NULL)
 public class JPushMessageEntity {
     @JsonProperty(value = "oven_id")
