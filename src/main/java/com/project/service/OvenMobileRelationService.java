@@ -195,7 +195,7 @@ public class OvenMobileRelationService {
         Long currentTime = System.currentTimeMillis();
         // 查询出三分钟以前的是数据
         // 差值在180000ms内表示在线;
-        List<OvenStatus> ovenStatusList = ovenStatusRepository.findOvenStatusByUpdateTimeBefore(currentTime-180000);
+        List<OvenStatus> ovenStatusList = ovenStatusRepository.findOvenStatusByUpdateTimeBefore(currentTime-1800000);
         if (ovenStatusList != null || !ovenStatusList.isEmpty()){
             for (int i=0;i<ovenStatusList.size();i++){
                 OvenStatus ovenStatus = ovenStatusList.get(i);
@@ -207,16 +207,16 @@ public class OvenMobileRelationService {
                 MobileDetailInfo mobileDetailInfo = mobileDetailInfoRepository.findMobileDetailInfoByMobileId(ovenMobileRelation.getMobileId());
                 OvenDetailInfo ovenDetailInfo = ovenDetailInfoRepository.findOvenDetailInfoByOvenId(ovenMobileRelation.getOvenId());
                 String ovenName = ovenDetailInfo.getOvenName();
-                log.info("{}设备处于离线状态",ovenName);
+                log.debug("{}设备处于离线状态",ovenName);
                 // 为1表示当前记录已经发送不需要再次发送，但是需要
                 boolean result = offLineOvenSet.add(ovenStatus.getOvenId());
-                log.info("{}添加至离线列表，添加结果{}",ovenStatus.getOvenId(),result);
+                log.debug("{}添加至离线列表，添加结果{}",ovenStatus.getOvenId(),result);
                 if (ovenStatus.getIsSend() == 1){
-                    log.info("{}已发送过状态，不需要再发送",ovenName);
+                    log.debug("{}已发送过状态，不需要再发送",ovenName);
                     continue;
                 }
                 if (ovenStatus.getIsSend() == 2){
-                    log.info("{}上次发送失败，不需要再发送",ovenName);
+                    log.debug("{}上次发送失败，不需要再发送",ovenName);
                     continue;
                 }
                 JPushMessageEntity jPushMessageEntity = new JPushMessageEntity(ovenDetailInfo.getOvenId(),mobileDetailInfo.getMobileId(),4,ovenDetailInfo.getOvenName()+"设备已断开连接");
