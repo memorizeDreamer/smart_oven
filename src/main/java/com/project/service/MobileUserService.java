@@ -123,6 +123,12 @@ public class MobileUserService {
         return mobileUser == null;
     }
 
+    /**
+     * 更新用户信息
+     * @param mobileUser
+     * @param session
+     * @return
+     */
     public ServerResponse updateUserInfo(MobileUser mobileUser, HttpSession session){
         mobileUser.setUpdateTime(System.currentTimeMillis());
         mobileUserRepository.updateUserInfo(mobileUser.getUsername(),mobileUser.getNickname(),mobileUser.getSex(),mobileUser.getBirthday(),mobileUser.getAddress(),System.currentTimeMillis(),mobileUser.getId());
@@ -133,6 +139,14 @@ public class MobileUserService {
         return ServerResponse.createBySuccessMessage("更新成功");
     }
 
+    /**
+     * 获取用户信息
+     * @param mobileNum
+     * @return
+     */
+    public ServerResponse getUserInfo(String mobileNum){
+        return ServerResponse.createBySuccess(mobileUserRepository.findMobileUserByMobile(mobileNum));
+    }
 
     /**
      * 校验用户名和密码
