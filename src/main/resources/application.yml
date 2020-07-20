@@ -3,6 +3,13 @@ server:
   connection-timeout: 180000
 
 spring:
+  mqtt:
+    host-url: tcp://101.132.143.52
+    username: test
+    password: h:q6sRK^hJDjbeVg
+    client-id: ${random.value}
+    default-topic: oven/tagId
+
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/smart_oven?useSSL=false&characterEncoding=utf8
     username: root

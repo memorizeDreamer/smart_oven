@@ -14,6 +14,7 @@ import cn.jpush.api.push.model.notification.Notification;
 import cn.jpush.api.push.model.notification.PlatformNotification;
 import com.project.response.ServerResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,15 @@ public class JPushMessage {
     @Value("${jiguang.app_key}")
     private String appKey;
 
+    @Autowired
+    private MqttGateway mqttGateway;
+
     public ServerResponse jPushMessage(String message, String tagId){
+        // {"type":6,"message":"message","oven_id":"ovenId","mobile_id":"mobileId"}
+        if (message.contains("\"type\":2") || message.contains("\"type\":6")) {
+            mqttGateway.sendToMqtt("oven/" + tagId, 2, message);
+            ServerResponse.createBySuccessMessage("推送成功");
+        }
         ClientConfig clientConfig = ClientConfig.getInstance();
         JPushClient jpushClient = new JPushClient(masterSecret, appKey, null, clientConfig);
         PushPayload payload = buildPushObjectAllAliasAlert(message,tagId);
