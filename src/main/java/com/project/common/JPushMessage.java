@@ -33,9 +33,9 @@ public class JPushMessage {
 
     public ServerResponse jPushMessage(String message, String tagId){
         // {"type":6,"message":"message","oven_id":"ovenId","mobile_id":"mobileId"}
-        if (message.contains("\"type\":2") || message.contains("\"type\":6")) {
+        if (tagId.length() == 12 && (message.contains("\\\"type\\\":2") || message.contains("\\\"type\\\":6") || message.contains("\"type\":2") || message.contains("\"type\":6"))) {
             mqttGateway.sendToMqtt("oven/" + tagId, 2, message);
-            ServerResponse.createBySuccessMessage("推送成功");
+            return ServerResponse.createBySuccessMessage("推送成功");
         }
         ClientConfig clientConfig = ClientConfig.getInstance();
         JPushClient jpushClient = new JPushClient(masterSecret, appKey, null, clientConfig);
