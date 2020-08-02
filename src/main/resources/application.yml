@@ -4,7 +4,7 @@ server:
 
 spring:
   mqtt:
-    host-url: tcp://101.132.143.52
+    host-url: tcp://127.0.0.1
     username: test
     password: h:q6sRK^hJDjbeVg
     client-id: ${random.value}
